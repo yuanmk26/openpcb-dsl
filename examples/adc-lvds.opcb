@@ -1,0 +1,14 @@
+diff_pair ADC_D0 {
+  p: U_ADC.DOUT0_P -> node ADC_D0_P -> U_FPGA.ADC_D0_P
+  n: U_ADC.DOUT0_N -> node ADC_D0_N -> U_FPGA.ADC_D0_N
+
+  endpoint rx near U_FPGA {
+    bridge RT0: Resistor(value=100R) between p,n
+  }
+
+  constraint {
+    differential_impedance 100ohm
+    intra_pair_length_match within 0.2mm
+    route_together true
+  }
+}

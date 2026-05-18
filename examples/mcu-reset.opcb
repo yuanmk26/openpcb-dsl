@@ -1,0 +1,5 @@
+U1: MCU(
+  NRST.Node(RESET)
+    .PullUp(R1: Resistor(value=10k), to=3V3)
+    .Shunt(C1: Capacitor(value=100nF), to=GND)
+);

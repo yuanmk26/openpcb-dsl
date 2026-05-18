@@ -1,0 +1,41 @@
+{
+  "name": "openpcb-dsl",
+  "version": "0.1.0",
+  "description": "Compiler core for OpenPCB DSL to AST, IR, and preliminary emitter outputs.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "docs",
+    "examples",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts",
+    "test": "vitest run",
+    "dev": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "openpcb",
+    "pcb",
+    "dsl",
+    "compiler",
+    "electronics"
+  ],
+  "license": "MIT",
+  "packageManager": "pnpm@9.1.1",
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsup": "^8.2.4",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}

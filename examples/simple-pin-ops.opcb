@@ -1,0 +1,8 @@
+Inst_U1: U1(
+  P1.Node(node1)
+    .PullUp(R1: Resistor(value=10k), to=VCC),
+
+  P2.Node(node1)
+    .Series(R2: Resistor(value=22R), to=net4)
+    .Shunt(C1: Capacitor(value=100nF), to=GND)
+);
