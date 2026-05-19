@@ -1,9 +1,8 @@
 # openpcb-dsl
 
-`openpcb-dsl` 是 OpenPCB 项目的独立 TypeScript 编译核心库，负责将面向用户的电路 DSL 降级为结构化中间表示，供上层工具进行检查、验证、转换和导出。
+`openpcb-dsl` 是 OpenPCB 项目的独立 TypeScript 编译核心，负责将面向用户的电路 DSL 降级为结构化中间表示，供上层工具进行检查、验证、转换和导出。
 
 当前编译链路：
-
 `OpenPCB DSL -> AST -> OpenPCB Circuit IR -> 初步 tscircuit / Circuit JSON emitter`
 
 ## 为什么需要这个库
@@ -28,8 +27,8 @@ MVP-0 的重点是项目骨架和语义分层，不是完整文本 parser。
 - 基础 pin operation 的 AST -> IR 编译
 - IR 校验与 diagnostics
 - 初步 TSX emitter
-- 占位式 Circuit JSON emitter
-- 示例和测试
+- 占位版 Circuit JSON emitter
+- 示例与测试
 
 当前未包含：
 
@@ -52,6 +51,29 @@ pnpm test
 pnpm typecheck
 pnpm dev
 ```
+
+## Examples
+
+`examples/` 现在按编译阶段组织，而不是把所有示例平铺在根目录：
+
+```text
+examples/
+  dsl/
+    *.opcb
+  ir/
+  emitters/
+    tscircuit-tsx/
+    circuit-json/
+```
+
+目录约定：
+
+- `examples/dsl/`：DSL 输入示例，主要用于表达语言设计意图。
+- `examples/ir/`：IR 层示例或快照，用于展示 AST lowering 之后的数据结构。
+- `examples/emitters/tscircuit-tsx/`：TSX emitter 输出示例。
+- `examples/emitters/circuit-json/`：Circuit JSON emitter 输出示例。
+
+当前只有 `dsl/` 下提交了实际样例文件。由于 parser、diff pair 展开和 emitter 仍处于 MVP 早期阶段，其余目录先作为结构预留，不假装已经具备稳定产物。
 
 ## 最小示例
 
@@ -97,11 +119,11 @@ const tsx = emitTscircuitTsx(ir);
 
 ## 当前限制
 
-- `parseOpenPcbDsl()` 会明确抛出“尚未实现”的错误。
+- `parseOpenPcbDsl()` 目前会明确抛出“尚未实现”的错误。
 - 元件引脚建模当前仅覆盖 `R1.1`、`R1.2` 这类简单自动生成端子。
 - diff pair 只有 AST/IR 占位类型，还没有真正的展开逻辑。
-- TSX emitter 目前是 draft 版本，不承诺与真实 tscircuit API 完全兼容。
-- Circuit JSON 导出目前仍是概念性占位输出。
+- TSX emitter 当前是 draft 版本，不承诺与真实 tscircuit API 完全兼容。
+- Circuit JSON 导出当前仍是概念性占位输出。
 
 ## 文档
 
