@@ -52,6 +52,17 @@ pnpm typecheck
 pnpm dev
 ```
 
+## Parser 状态
+
+当前文本 parser 已支持：
+
+- `parseOpenPcbDsl(source)`：把 pin-centered instance DSL 解析成 `ProgramAst`
+- `compileOpenPcbDsl(source)`：把文本 DSL 直接解析并降级为 `CircuitIR`
+- 当前仅支持 `Ref Type(...)` 形式的顶层实例声明
+- 当前支持的 pin 操作为 `PullUp`、`PullDown`、`Series`、`Shunt`、`Decouple`、`Tap`
+- 支持空行、行尾逗号、`#` 注释和 `//` 注释
+- 第一版仍明确不支持 `diff_pair` 文本语法和 `bridge` 解析
+
 ## Examples
 
 `examples/` 现在按编译阶段组织，而不是把所有示例平铺在根目录：
@@ -80,49 +91,28 @@ examples/
 
 ## 最小示例
 
-当前 parser 还未实现，因此 MVP-0 主要从 AST 输入开始工作：
+当前既可以从 AST 输入开始，也可以直接从 `.opcb` 文本开始：
 
 ```ts
-import { compileAstToIr, emitTscircuitTsx, validateCircuitIr } from "openpcb-dsl";
+import { compileOpenPcbDsl, emitTscircuitTsx, validateCircuitIr } from "openpcb-dsl";
 
-const ast = {
-  kind: "program",
-  instances: [
-    {
-      kind: "instance",
-      ref: "U1",
-      componentType: "MCU",
-      pins: [
-        {
-          kind: "pin_expr",
-          pin: "NRST",
-          node: "RESET",
-          operations: [
-            {
-              kind: "pullup",
-              component: {
-                ref: "R1",
-                type: "Resistor",
-                params: { value: "10k" },
-              },
-              to: "3V3",
-            },
-          ],
-        },
-      ],
-    },
-  ],
-  diffPairs: [],
-};
+const source = `
+U1 MCU(
+  NRST.Node(RESET)
+    .PullUp(R1 Resistor(value=10k), to=3V3)
+    .Shunt(C1 Capacitor(value=100nF), to=GND)
+);
+`;
 
-const ir = compileAstToIr(ast);
+const ir = compileOpenPcbDsl(source);
 const diagnostics = validateCircuitIr(ir);
 const tsx = emitTscircuitTsx(ir);
 ```
 
 ## 当前限制
 
-- `parseOpenPcbDsl()` 目前会明确抛出“尚未实现”的错误。
+- `parseOpenPcbDsl()` 当前支持 pin-centered instance DSL，但还不支持 `diff_pair` 文本语法。
+- `compileOpenPcbDsl()` 会把 `.opcb` 文本直接解析并编译到 `CircuitIR`。
 - 元件引脚建模当前仅覆盖 `R1.1`、`R1.2` 这类简单自动生成端子。
 - diff pair 只有 AST/IR 占位类型，还没有真正的展开逻辑。
 - TSX emitter 当前是 draft 版本，不承诺与真实 tscircuit API 完全兼容。

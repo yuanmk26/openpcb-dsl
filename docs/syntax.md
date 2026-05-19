@@ -16,6 +16,21 @@ U1 MCU(
 
 当前文档约定里，元件例化使用空格分隔 `ref` 和 `type`，例如 `U1 MCU(...)`、`R1 Resistor(...)`，不再要求 `:`。
 
+## Parser 支持范围
+
+当前文本 parser 支持：
+
+- `Ref Type(...)` 形式的顶层实例声明
+- 以 `Pin.Node(net)` 开头的 pin 链式表达式
+- `PullUp`、`PullDown`、`Series`、`Shunt`、`Decouple`、`Tap`
+- `R1 Resistor(value=10k)` 这类内联辅助元件声明
+- 空行、行尾逗号、`#` 注释和 `//` 注释
+
+当前文本 parser 还不支持：
+
+- `diff_pair` 文本语法
+- `bridge` 解析
+
 这段语义可以自然理解为：
 
 1. 把 `NRST` 绑定到主节点 `RESET`
