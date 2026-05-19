@@ -87,8 +87,8 @@ interface PinExprAst {
 
 ```opcb
 NRST.Node(RESET)
-  .PullUp(R1: Resistor(value=10k), to=3V3)
-  .Shunt(C1: Capacitor(value=100nF), to=GND)
+  .PullUp(R1 Resistor(value=10k), to=3V3)
+  .Shunt(C1 Capacitor(value=100nF), to=GND)
 ```
 
 对应的 AST 含义是：

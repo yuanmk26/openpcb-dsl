@@ -3,7 +3,7 @@ diff_pair ADC_D0 {
   n: U_ADC.DOUT0_N -> node ADC_D0_N -> U_FPGA.ADC_D0_N
 
   endpoint rx near U_FPGA {
-    bridge RT0: Resistor(value=100R) between p,n
+    bridge RT0 Resistor(value=100R) between p,n
   }
 
   constraint {
