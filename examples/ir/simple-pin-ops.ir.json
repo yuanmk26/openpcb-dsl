@@ -1,0 +1,84 @@
+{
+  "components": {
+    "Inst_U1": {
+      "ref": "Inst_U1",
+      "type": "U1"
+    },
+    "R1": {
+      "ref": "R1",
+      "type": "Resistor",
+      "value": "10k",
+      "params": {
+        "value": "10k"
+      }
+    },
+    "R2": {
+      "ref": "R2",
+      "type": "Resistor",
+      "value": "22R",
+      "params": {
+        "value": "22R"
+      }
+    },
+    "C1": {
+      "ref": "C1",
+      "type": "Capacitor",
+      "value": "100nF",
+      "params": {
+        "value": "100nF"
+      }
+    }
+  },
+  "nets": {
+    "node1": {
+      "name": "node1",
+      "pins": [
+        "Inst_U1.P1",
+        "R1.1",
+        "Inst_U1.P2",
+        "R2.1",
+        "C1.1"
+      ]
+    },
+    "VCC": {
+      "name": "VCC",
+      "pins": [
+        "R1.2"
+      ]
+    },
+    "net4": {
+      "name": "net4",
+      "pins": [
+        "R2.2"
+      ]
+    },
+    "GND": {
+      "name": "GND",
+      "pins": [
+        "C1.2"
+      ]
+    }
+  },
+  "patterns": [
+    {
+      "kind": "pullup",
+      "fromNet": "node1",
+      "toNet": "VCC",
+      "component": "R1"
+    },
+    {
+      "kind": "series",
+      "fromNet": "node1",
+      "toNet": "net4",
+      "component": "R2"
+    },
+    {
+      "kind": "shunt",
+      "fromNet": "node1",
+      "toNet": "GND",
+      "component": "C1"
+    }
+  ],
+  "diffPairs": {},
+  "constraints": []
+}

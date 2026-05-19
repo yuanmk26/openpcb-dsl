@@ -1,0 +1,62 @@
+{
+  "components": {
+    "U1": {
+      "ref": "U1",
+      "type": "MCU"
+    },
+    "R1": {
+      "ref": "R1",
+      "type": "Resistor",
+      "value": "10k",
+      "params": {
+        "value": "10k"
+      }
+    },
+    "C1": {
+      "ref": "C1",
+      "type": "Capacitor",
+      "value": "100nF",
+      "params": {
+        "value": "100nF"
+      }
+    }
+  },
+  "nets": {
+    "RESET": {
+      "name": "RESET",
+      "pins": [
+        "U1.NRST",
+        "R1.1",
+        "C1.1"
+      ]
+    },
+    "3V3": {
+      "name": "3V3",
+      "pins": [
+        "R1.2"
+      ]
+    },
+    "GND": {
+      "name": "GND",
+      "pins": [
+        "C1.2"
+      ]
+    }
+  },
+  "patterns": [
+    {
+      "kind": "pullup",
+      "fromNet": "RESET",
+      "toNet": "3V3",
+      "component": "R1"
+    },
+    {
+      "kind": "shunt",
+      "fromNet": "RESET",
+      "toNet": "GND",
+      "component": "C1"
+    }
+  ],
+  "diffPairs": {},
+  "constraints": []
+}
