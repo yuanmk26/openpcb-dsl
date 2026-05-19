@@ -12,9 +12,9 @@
 ## MVP-1
 
 - 实现 pin-centered 链式语法的真实 parser
+- 提供基础测试 CLI
 - 改进 TSX emitter
 - 增加更多元件映射
-- 添加 CLI 命令
 
 ## MVP-2
 

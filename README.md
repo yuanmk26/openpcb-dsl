@@ -1,41 +1,29 @@
 # openpcb-dsl
 
-`openpcb-dsl` 是 OpenPCB 项目的独立 TypeScript 编译核心，负责将面向用户的电路 DSL 降级为结构化中间表示，供上层工具进行检查、验证、转换和导出。
+`openpcb-dsl` 是 OpenPCB 项目的独立 TypeScript 编译核心，负责把面向用户的电路 DSL 降级为结构化中间表示，供上层工具做解析、校验、转换和导出。
 
 当前编译链路：
+
 `OpenPCB DSL -> AST -> OpenPCB Circuit IR -> 初步 tscircuit / Circuit JSON emitter`
 
-## 为什么需要这个库
+## 当前能力
 
-OpenPCB 需要一个统一的编译层，供以下模块共享：
+当前已具备：
 
-- AI 辅助电路生成 agent
-- GUI 编辑器和预览工具
-- VSCode 插件
-- KiCad 及其他下游导出器
-
-把编译核心独立成库，有利于让数据模型更明确、更可测试，也更方便在不同运行环境之间复用。
-
-## 当前 MVP 范围
-
-MVP-0 的重点是项目骨架和语义分层，不是完整文本 parser。
-
-当前已包含：
-
-- 面向 pin-centered DSL 的第一版 AST 类型
-- 规范化的电路 IR 类型
-- 基础 pin operation 的 AST -> IR 编译
-- IR 校验与 diagnostics
+- pin-centered DSL 的 AST 类型
+- 规范化的 Circuit IR 类型
+- `.opcb` 文本 parser
+- `AST -> IR` 编译
+- IR 校验 diagnostics
 - 初步 TSX emitter
-- 占位版 Circuit JSON emitter
-- 示例与测试
+- 占位性质的 Circuit JSON emitter
+- 薄测试 CLI
 
-当前未包含：
+当前还未完成：
 
-- 真正的 `.opcb` 文本 parser
-- diff pair 展开逻辑
-- CLI
-- 可直接用于生产的 tscircuit / Circuit JSON 映射
+- `diff_pair` 文本语法解析
+- diff pair 真实展开逻辑
+- 生产级 tscircuit / Circuit JSON 映射
 
 ## 安装
 
@@ -58,40 +46,38 @@ pnpm dev
 
 - `parseOpenPcbDsl(source)`：把 pin-centered instance DSL 解析成 `ProgramAst`
 - `compileOpenPcbDsl(source)`：把文本 DSL 直接解析并降级为 `CircuitIR`
-- 当前仅支持 `Ref Type(...)` 形式的顶层实例声明
-- 当前支持的 pin 操作为 `PullUp`、`PullDown`、`Series`、`Shunt`、`Decouple`、`Tap`
-- 支持空行、行尾逗号、`#` 注释和 `//` 注释
-- 第一版仍明确不支持 `diff_pair` 文本语法和 `bridge` 解析
+- 顶层实例声明：`Ref Type(...)`
+- pin 操作：`PullUp`、`PullDown`、`Series`、`Shunt`、`Decouple`、`Tap`
+- 内联辅助元件：`R1 Resistor(value=10k)`
+- 空行、尾逗号、`#` 注释、`//` 注释
 
-## Examples
+当前仍不支持：
 
-`examples/` 现在按编译阶段组织，而不是把所有示例平铺在根目录：
+- `diff_pair` 文本语法
+- `bridge` 文本解析
 
-```text
-examples/
-  dsl/
-    *.opcb
-  ast/
-    *.ast.json
-  ir/
-  emitters/
-    tscircuit-tsx/
-    circuit-json/
+## CLI
+
+当前仓库已提供一个很薄的测试用 CLI，命令名为 `openpcb-dsl`，主要用于 DSL 调试、集成和端到端测试。
+
+支持的命令：
+
+- `openpcb-dsl parse <file>`：输出 AST JSON
+- `openpcb-dsl compile <file>`：输出 IR JSON
+- `openpcb-dsl validate <file>`：输出 diagnostics JSON
+- `--pretty`：格式化 JSON 输出
+
+示例：
+
+```bash
+openpcb-dsl parse examples/dsl/mcu-reset.opcb --pretty
+openpcb-dsl compile examples/dsl/simple-pin-ops.opcb
+openpcb-dsl validate examples/dsl/mcu-reset.opcb
 ```
 
-目录约定：
-
-- `examples/dsl/`：DSL 输入示例，主要用于表达语言设计意图。
-- `examples/ast/`：当前编译器可直接消费的 AST 示例，用于展示文本 parser 之前的结构化输入层。
-- `examples/ir/`：IR 层示例或快照，用于展示 AST lowering 之后的数据结构。
-- `examples/emitters/tscircuit-tsx/`：TSX emitter 输出示例。
-- `examples/emitters/circuit-json/`：Circuit JSON emitter 输出示例。
-
-当前 `dsl/` 和 `ast/` 下已经提交了实际样例文件。需要注意的是，`ast/` 中的文件当前是手工维护的结构化输入，不是由 `.opcb` parser 自动生成的产物。由于 parser、diff pair 展开和 emitter 仍处于 MVP 早期阶段，其余目录先作为结构预留，不假装已经具备稳定产物。
+更多说明见 [docs/cli.md](docs/cli.md)。
 
 ## 最小示例
-
-当前既可以从 AST 输入开始，也可以直接从 `.opcb` 文本开始：
 
 ```ts
 import { compileOpenPcbDsl, emitTscircuitTsx, validateCircuitIr } from "openpcb-dsl";
@@ -109,14 +95,33 @@ const diagnostics = validateCircuitIr(ir);
 const tsx = emitTscircuitTsx(ir);
 ```
 
+## 示例目录
+
+```text
+examples/
+  dsl/
+    *.opcb
+  ast/
+    *.ast.json
+  ir/
+  emitters/
+    tscircuit-tsx/
+    circuit-json/
+```
+
+- `examples/dsl/`：DSL 输入示例
+- `examples/ast/`：当前编译器可直接消费的 AST 示例
+- `examples/ir/`：IR 示例或快照
+- `examples/emitters/`：emitter 输出示例
+
 ## 当前限制
 
-- `parseOpenPcbDsl()` 当前支持 pin-centered instance DSL，但还不支持 `diff_pair` 文本语法。
-- `compileOpenPcbDsl()` 会把 `.opcb` 文本直接解析并编译到 `CircuitIR`。
-- 元件引脚建模当前仅覆盖 `R1.1`、`R1.2` 这类简单自动生成端子。
-- diff pair 只有 AST/IR 占位类型，还没有真正的展开逻辑。
-- TSX emitter 当前是 draft 版本，不承诺与真实 tscircuit API 完全兼容。
-- Circuit JSON 导出当前仍是概念性占位输出。
+- `parseOpenPcbDsl()` 当前只支持 pin-centered instance DSL
+- `compileOpenPcbDsl()` 会把 `.opcb` 文本直接解析并编译到 `CircuitIR`
+- 元件引脚建模当前只覆盖 `R1.1`、`R1.2` 这类简单自动生成端子
+- diff pair 目前只有 AST / IR 占位结构，还没有真正展开
+- TSX emitter 仍是 draft 版本
+- Circuit JSON 输出仍是概念性占位输出
 
 ## 文档
 
@@ -124,12 +129,6 @@ const tsx = emitTscircuitTsx(ir);
 - [语法设计](docs/syntax.md)
 - [AST 设计](docs/ast.md)
 - [IR 设计](docs/ir.md)
+- [CLI 使用说明](docs/cli.md)
 - [tscircuit 映射](docs/tscircuit-mapping.md)
 - [路线图](docs/roadmap.md)
-
-## Roadmap
-
-- `MVP-0`：项目骨架、IR、AST、编译、校验、draft emitter
-- `MVP-1`：真实 parser、更完整的 emitter、更多元件映射、CLI
-- `MVP-2`：diff pair 展开、endpoint-local 操作、LVDS 相关流程
-- `MVP-3`：Circuit JSON emitter、tscircuit 集成测试、原理图预览工作流
