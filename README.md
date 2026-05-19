@@ -60,6 +60,8 @@ pnpm dev
 examples/
   dsl/
     *.opcb
+  ast/
+    *.ast.json
   ir/
   emitters/
     tscircuit-tsx/
@@ -69,11 +71,12 @@ examples/
 目录约定：
 
 - `examples/dsl/`：DSL 输入示例，主要用于表达语言设计意图。
+- `examples/ast/`：当前编译器可直接消费的 AST 示例，用于展示文本 parser 之前的结构化输入层。
 - `examples/ir/`：IR 层示例或快照，用于展示 AST lowering 之后的数据结构。
 - `examples/emitters/tscircuit-tsx/`：TSX emitter 输出示例。
 - `examples/emitters/circuit-json/`：Circuit JSON emitter 输出示例。
 
-当前只有 `dsl/` 下提交了实际样例文件。由于 parser、diff pair 展开和 emitter 仍处于 MVP 早期阶段，其余目录先作为结构预留，不假装已经具备稳定产物。
+当前 `dsl/` 和 `ast/` 下已经提交了实际样例文件。需要注意的是，`ast/` 中的文件当前是手工维护的结构化输入，不是由 `.opcb` parser 自动生成的产物。由于 parser、diff pair 展开和 emitter 仍处于 MVP 早期阶段，其余目录先作为结构预留，不假装已经具备稳定产物。
 
 ## 最小示例
 
@@ -129,6 +132,7 @@ const tsx = emitTscircuitTsx(ir);
 
 - [架构说明](docs/architecture.md)
 - [语法设计](docs/syntax.md)
+- [AST 设计](docs/ast.md)
 - [IR 设计](docs/ir.md)
 - [tscircuit 映射](docs/tscircuit-mapping.md)
 - [路线图](docs/roadmap.md)

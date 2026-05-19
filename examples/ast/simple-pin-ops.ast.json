@@ -1,0 +1,60 @@
+{
+  "kind": "program",
+  "instances": [
+    {
+      "kind": "instance",
+      "ref": "Inst_U1",
+      "componentType": "U1",
+      "pins": [
+        {
+          "kind": "pin_expr",
+          "pin": "P1",
+          "node": "node1",
+          "operations": [
+            {
+              "kind": "pullup",
+              "component": {
+                "ref": "R1",
+                "type": "Resistor",
+                "params": {
+                  "value": "10k"
+                }
+              },
+              "to": "VCC"
+            }
+          ]
+        },
+        {
+          "kind": "pin_expr",
+          "pin": "P2",
+          "node": "node1",
+          "operations": [
+            {
+              "kind": "series",
+              "component": {
+                "ref": "R2",
+                "type": "Resistor",
+                "params": {
+                  "value": "22R"
+                }
+              },
+              "to": "net4"
+            },
+            {
+              "kind": "shunt",
+              "component": {
+                "ref": "C1",
+                "type": "Capacitor",
+                "params": {
+                  "value": "100nF"
+                }
+              },
+              "to": "GND"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "diffPairs": []
+}
