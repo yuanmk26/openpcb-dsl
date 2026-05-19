@@ -85,6 +85,7 @@ pnpm dev
 
 - `diff_pair` 文本语法
 - `bridge` 文本解析
+- `component / package / device / inst` 顶层定义语法
 
 ## CLI
 
@@ -167,6 +168,8 @@ examples/
 - Circuit JSON 输出仍是概念性占位输出
 
 ## 文档
+
+`docs/syntax.md` 当前同时包含两部分内容：一部分是已经实现的 pin-centered DSL 语法说明，另一部分是尚未实现的 vNext 语法草案。阅读时请注意区分“当前 parser 已支持能力”和“后续设计方向”。
 
 - [架构说明](docs/architecture.md)
 - [语法设计](docs/syntax.md)
