@@ -6,6 +6,36 @@
 
 `OpenPCB DSL -> AST -> OpenPCB Circuit IR -> 初步 tscircuit / Circuit JSON emitter`
 
+## 推荐使用方式
+
+对大多数调用方，推荐把 `.opcb` 文本 DSL 作为主输入，并直接使用以下入口：
+
+- `compileOpenPcbDsl(source)`：文本 DSL -> `CircuitIR`
+- `parseOpenPcbDsl(source)`：文本 DSL -> `ProgramAst`
+- `openpcb-dsl` CLI：直接查看 AST、IR 和 diagnostics
+
+如果你的目标是集成、调试或测试，优先使用：
+
+- 库入口：`compileOpenPcbDsl()`
+- 命令行入口：`openpcb-dsl compile <file>`
+
+## AST 的定位
+
+AST 现在仍然保留，但它的定位需要明确区分：
+
+- 不是大多数用户的主入口
+- 主要作为 parser 和 IR lowering 之间的中间层
+- 主要服务于编译器开发、测试、调试和高级集成场景
+
+也就是说，AST 当前更像“内部语义边界 + 高级接口”，而不是面向普通用户的首选使用方式。
+
+以下场景仍然适合直接使用 AST：
+
+- 单独测试 `AST -> IR` 逻辑
+- 调试 parser 输出
+- GUI / agent / 编辑器直接生成结构化输入
+- 对编译器做分阶段验证
+
 ## 当前能力
 
 当前已具备：
@@ -79,6 +109,8 @@ openpcb-dsl validate examples/dsl/mcu-reset.opcb
 
 ## 最小示例
 
+推荐从文本 DSL 直接进入 `CircuitIR`：
+
 ```ts
 import { compileOpenPcbDsl, emitTscircuitTsx, validateCircuitIr } from "openpcb-dsl";
 
@@ -95,6 +127,15 @@ const diagnostics = validateCircuitIr(ir);
 const tsx = emitTscircuitTsx(ir);
 ```
 
+如果你需要查看 parser 的分阶段产物，再使用：
+
+```ts
+import { parseOpenPcbDsl, compileAstToIr } from "openpcb-dsl";
+
+const ast = parseOpenPcbDsl(source);
+const ir = compileAstToIr(ast);
+```
+
 ## 示例目录
 
 ```text
@@ -109,10 +150,12 @@ examples/
     circuit-json/
 ```
 
-- `examples/dsl/`：DSL 输入示例
-- `examples/ast/`：当前编译器可直接消费的 AST 示例
+- `examples/dsl/`：主要展示面，面向用户的 DSL 输入示例
+- `examples/ast/`：辅助展示面，主要用于说明内部 AST 结构和编译测试
 - `examples/ir/`：IR 示例或快照
 - `examples/emitters/`：emitter 输出示例
+
+如果你只是想了解语言怎么写、怎么跑，优先看 `examples/dsl/`。
 
 ## 当前限制
 

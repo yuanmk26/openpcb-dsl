@@ -1,32 +1,59 @@
 # AST 设计
 
-## 目的
+## AST 的角色
 
-`ProgramAst` 是 OpenPCB DSL 在进入 IR 之前的结构化语义层。
+`ProgramAst` 是 OpenPCB DSL 在进入 `CircuitIR` 之前的结构化语义层。
 
-在当前 MVP-0 阶段，它有两个明确职责：
+当前阶段需要明确的是：AST 仍然有价值，但它不是大多数用户的推荐主入口。
 
-- 作为 `AST -> IR` 编译器的直接输入
-- 作为文本 DSL 与规范化 `CircuitIR` 之间的中间表达
+更准确地说：
 
-需要注意的是，当前仓库里的 AST 不是由 `.opcb` parser 自动生成的，因为文本 parser 仍未实现。现阶段 AST 主要用于固定编译输入形状、验证 lowering 规则，并支撑测试与示例。
+- 对普通调用方，推荐直接使用 `.opcb` 文本 DSL
+- 对库调用，推荐优先使用 `compileOpenPcbDsl()` 直接得到 `CircuitIR`
+- 对编译器开发、测试、调试和高级集成，AST 仍然是重要的中间层
 
-## 设计原则
+也就是说，AST 当前的定位主要是：
 
-当前 AST 不是为了完整保留文本语法细节，而是为了让后续 lowering 过程简单、稳定、可测试。
+- parser 和 IR lowering 之间的内部语义边界
+- `AST -> IR` 编译逻辑的直接输入
+- 分阶段测试和调试的手脚架
+- 高级调用方可选使用的结构化接口
 
-设计重点：
+## 为什么保留 AST
 
-- 以 `pin-centered` 方式组织连接语义
-- 让每个引脚先绑定一个明确的 `node`
-- 把链式操作表示成显式 `operations[]`
-- 为差分对保留独立结构，而不是强行塞进单 pin 表达式
+保留 AST 的主要原因有：
 
-这意味着 AST 更接近“语义化输入对象”，而不是“保真语法树”。
+- 让 parser 不直接耦合 IR 细节
+- 让 `AST -> IR` 能被单独测试
+- 让语法演进时仍保留稳定的中间契约
+- 让上游工具在必要时可以直接生成结构化输入
+
+因此，AST 不是面向普通用户的首选入口，但也不只是“临时废件”。
+
+## 推荐使用方式
+
+### 普通使用
+
+推荐直接走文本 DSL：
+
+```ts
+import { compileOpenPcbDsl } from "openpcb-dsl";
+
+const ir = compileOpenPcbDsl(source);
+```
+
+### 分阶段调试
+
+如果你需要观察 parser 结果或单独验证 lowering，再使用 AST：
+
+```ts
+import { parseOpenPcbDsl, compileAstToIr } from "openpcb-dsl";
+
+const ast = parseOpenPcbDsl(source);
+const ir = compileAstToIr(ast);
+```
 
 ## 顶层结构
-
-顶层类型是 `ProgramAst`：
 
 ```ts
 interface ProgramAst {
@@ -42,8 +69,6 @@ interface ProgramAst {
 - `diffPairs`：差分对声明与约束
 
 ## InstanceAst
-
-`InstanceAst` 表示一个元件实例：
 
 ```ts
 interface InstanceAst {
@@ -62,11 +87,7 @@ interface InstanceAst {
 - `params`：可选参数，保留源语义中的附加信息
 - `pins`：该实例下的 pin 表达式
 
-这里的 `pins` 不是元件符号库意义上的“引脚定义”，而是“对若干引脚写下的连接和附加操作”。
-
 ## PinExprAst
-
-`PinExprAst` 是当前 AST 设计的核心：
 
 ```ts
 interface PinExprAst {
@@ -83,7 +104,7 @@ interface PinExprAst {
 - `node`：该引脚首先绑定到的逻辑网络
 - `operations`：围绕当前 `node` 继续展开的附加操作
 
-这个结构直接对应当前 DSL 的链式表达方式，例如：
+对应 DSL 示例：
 
 ```opcb
 NRST.Node(RESET)
@@ -91,15 +112,7 @@ NRST.Node(RESET)
   .Shunt(C1 Capacitor(value=100nF), to=GND)
 ```
 
-对应的 AST 含义是：
-
-1. 把 `NRST` 连接到 `RESET`
-2. 在 `RESET` 与 `3V3` 之间添加一个 `pullup`
-3. 在 `RESET` 与 `GND` 之间添加一个 `shunt`
-
 ## ComponentExprAst
-
-许多 pin 操作会内联携带一个辅助元件定义：
 
 ```ts
 interface ComponentExprAst {
@@ -111,11 +124,11 @@ interface ComponentExprAst {
 }
 ```
 
-它的目标不是表达完整器件库模型，而是为 lowering 提供足够的元件信息。当前编译器会把它进一步归一化为 `ComponentIR`。
+它的目标不是表达完整器件库模型，而是为 lowering 提供足够的元件信息。
 
 ## PinOperationAst
 
-当前支持的 pin 操作包括：
+当前 AST 类型中定义的 pin 操作包括：
 
 - `pullup`
 - `pulldown`
@@ -125,28 +138,13 @@ interface ComponentExprAst {
 - `tap`
 - `bridge`
 
-大多数操作都具有类似结构：
+需要注意：
 
-```ts
-{
-  kind: "...",
-  component: { ... },
-  to: "targetNet",
-  metadata?: { ... }
-}
-```
-
-其中：
-
-- `component`：参与该操作的辅助元件
-- `to`：目标网络
-- `metadata`：为后续流程保留的附加语义
-
-`tap` 是例外。它只有 `component`，没有 `to`，因为它代表挂接在当前网络上的单端或测试点类结构。
+- 当前文本 parser 已支持 `PullUp`、`PullDown`、`Series`、`Shunt`、`Decouple`、`Tap`
+- 当前文本 parser 还不支持 `bridge`
+- AST 类型保留 `bridge`，是为了后续语言能力扩展，而不是表示当前文本入口已经完整支持
 
 ## DiffPairAst
-
-差分对使用独立的数据结构：
 
 ```ts
 interface DiffPairAst {
@@ -161,22 +159,17 @@ interface DiffPairAst {
 }
 ```
 
-这样设计的原因是差分对天然涉及：
+当前状态：
 
-- p/n 两侧网络
-- 成对的端点集合
-- 成对约束
-- 可能跨两侧的语义操作
-
-这些内容并不适合硬塞回单个 `PinExprAst` 的链式模型里。
-
-当前 MVP-0 只定义了差分对 AST/IR 结构，真正的展开逻辑仍未实现。
+- AST / IR 层已有 `diff_pair` 占位结构
+- 文本 parser 还不支持 `diff_pair`
+- lowering 也还没有真正展开 `diff_pair`
 
 ## 与 IR 的关系
 
-AST 到 IR 的 lowering 重点是把语义化的 pin 表达式展开成规范化的网表和 pattern 信息。
+AST 到 IR 的 lowering 重点是把语义化的 pin 表达式展开为规范化 netlist 和 pattern 信息。
 
-例如一个 `PinExprAst`：
+例如：
 
 ```json
 {
@@ -197,7 +190,7 @@ AST 到 IR 的 lowering 重点是把语义化的 pin 表达式展开成规范化
 }
 ```
 
-在当前编译器中会被展开为：
+会被展开为：
 
 - `Inst_U1.P1` 接到 `node1`
 - 新增元件 `R1`
@@ -205,27 +198,21 @@ AST 到 IR 的 lowering 重点是把语义化的 pin 表达式展开成规范化
 - `R1.2` 接到 `VCC`
 - 记录一条 `pullup` pattern
 
-因此 AST 的主要价值在于：
-
-- 保留用户写法中的设计意图
-- 为 lowering 提供稳定的结构
-- 避免后续 IR 层再去反推“这个连接原本是 pullup 还是 series”
-
 ## 当前限制
 
-- 文本 `.opcb` parser 尚未实现，AST 目前需要手工构造
-- AST 只覆盖 MVP-0 关注的 pin-centered 核心语义
-- 差分对只有结构定义，缺少真实展开逻辑
-- 还没有更完整的元件属性、封装、方向性和库引用建模
+- AST 不是当前最推荐的主入口
+- AST 当前主要覆盖 pin-centered 核心语义
+- `diff_pair` 只有结构定义，没有真实展开
+- 文本 parser 当前并不覆盖 AST 类型里的所有潜在变体
 
 ## 示例
 
 可以参考：
 
-- [examples/ast/simple-pin-ops.ast.json](../examples/ast/simple-pin-ops.ast.json)
 - [examples/dsl/simple-pin-ops.opcb](../examples/dsl/simple-pin-ops.opcb)
+- [examples/ast/simple-pin-ops.ast.json](../examples/ast/simple-pin-ops.ast.json)
 
-这两个文件表达的是同一个最小案例的两种视图：
+它们表达的是同一个最小案例的两种视图：
 
-- `.opcb`：面向用户的 DSL 表达
-- `.ast.json`：当前编译器直接消费的结构化输入
+- `.opcb`：面向用户的主输入形式
+- `.ast.json`：面向编译器开发和调试的结构化中间表示
