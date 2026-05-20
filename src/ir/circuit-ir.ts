@@ -1,11 +1,40 @@
+import type { PinKind } from "../ast/nodes";
+
 export type NetKind = "signal" | "power" | "ground" | "analog" | "clock";
 
 export interface CircuitIR {
+  componentDefs: Record<string, ComponentDefIR>;
+  packageDefs: Record<string, PackageDefIR>;
+  deviceDefs: Record<string, DeviceDefIR>;
   components: Record<string, ComponentIR>;
   nets: Record<string, NetIR>;
   patterns: PatternIR[];
   diffPairs: Record<string, DiffPairIR>;
   constraints: ConstraintIR[];
+}
+
+export interface ComponentDefIR {
+  name: string;
+  pins: Record<string, PinDefIR>;
+  groups?: Record<string, string[]>;
+  attrs?: Record<string, string>;
+}
+
+export interface PinDefIR {
+  kind?: PinKind;
+}
+
+export interface PackageDefIR {
+  name: string;
+  pads: string[];
+}
+
+export interface DeviceDefIR {
+  name: string;
+  component: string;
+  package: string;
+  attrs?: Record<string, string>;
+  pinmap: Record<string, string>;
 }
 
 export interface ComponentIR {
@@ -14,6 +43,10 @@ export interface ComponentIR {
   value?: string;
   footprint?: string;
   params?: Record<string, string>;
+  device?: string;
+  component?: string;
+  package?: string;
+  attrs?: Record<string, string>;
 }
 
 export interface NetIR {
@@ -47,12 +80,24 @@ export interface DiffPairConstraints {
   polarity?: "fixed" | "swappable";
 }
 
+export interface DiffEndpointBridgeIR {
+  component: string;
+  legs: ["p", "n"];
+}
+
+export interface DiffEndpointIR {
+  name: string;
+  near?: string;
+  bridges: DiffEndpointBridgeIR[];
+}
+
 export interface DiffPairIR {
   name: string;
   pNet: string;
   nNet: string;
   pPins: string[];
   nPins: string[];
+  endpoints?: DiffEndpointIR[];
   constraints?: DiffPairConstraints;
 }
 
@@ -64,6 +109,9 @@ export interface ConstraintIR {
 
 export function createEmptyCircuitIr(): CircuitIR {
   return {
+    componentDefs: {},
+    packageDefs: {},
+    deviceDefs: {},
     components: {},
     nets: {},
     patterns: [],
@@ -114,5 +162,9 @@ function normalizeComponentSignature(component: ComponentIR) {
     value: component.value,
     footprint: component.footprint,
     params: component.params ?? {},
+    device: component.device,
+    component: component.component,
+    package: component.package,
+    attrs: component.attrs ?? {},
   };
 }

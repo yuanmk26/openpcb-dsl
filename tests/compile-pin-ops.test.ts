@@ -1,13 +1,24 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { ProgramAst } from "../src/ast/nodes";
 import { compileAstToIr } from "../src/compiler/ast-to-ir";
+import { compileOpenPcbDsl } from "../src/parser/parse";
+
+function readFixture(relativePath: string): string {
+  return readFileSync(new URL(`../${relativePath}`, import.meta.url), "utf8");
+}
 
 const ast: ProgramAst = {
   kind: "program",
+  components: [],
+  packages: [],
+  devices: [],
   instances: [
     {
       kind: "instance",
       ref: "Inst_U1",
+      target: "U1",
+      targetKind: "legacy_component",
       componentType: "U1",
       pins: [
         {
@@ -112,6 +123,57 @@ describe("compileAstToIr", () => {
       toNet: "GND",
       component: "C1",
       metadata: undefined,
+    });
+  });
+
+  it("lowers vNext device definitions and instance attrs into IR", () => {
+    const ir = compileOpenPcbDsl(readFixture("examples/dsl/vnext-device.opcb"));
+
+    expect(ir.componentDefs.MCU.pins.NRST).toEqual({ kind: "in" });
+    expect(ir.packageDefs.LQFP48.pads).toContain("48");
+    expect(ir.deviceDefs.STM32F103C8T6).toMatchObject({
+      component: "MCU",
+      package: "LQFP48",
+      pinmap: {
+        NRST: "7",
+      },
+    });
+    expect(ir.components.U1).toMatchObject({
+      ref: "U1",
+      type: "STM32F103C8T6",
+      device: "STM32F103C8T6",
+      component: "MCU",
+      package: "LQFP48",
+      attrs: {
+        role: "control",
+      },
+    });
+  });
+
+  it("lowers diff_pair bridges into patterns and nets", () => {
+    const ir = compileOpenPcbDsl(readFixture("examples/dsl/vnext-diff-pair.opcb"));
+
+    expect(ir.diffPairs.ADC_D0).toMatchObject({
+      pNet: "ADC_D0_P",
+      nNet: "ADC_D0_N",
+      constraints: {
+        differentialImpedance: "100ohm",
+        intraPairLengthMatch: "within_0p2mm",
+        routeTogether: true,
+      },
+    });
+    expect(ir.nets.ADC_D0_P.pins).toEqual(
+      expect.arrayContaining(["U_ADC.DOUT0_P", "U_FPGA.ADC_D0_P", "RT0.1"]),
+    );
+    expect(ir.patterns).toContainEqual({
+      kind: "bridge",
+      fromNet: "ADC_D0_P",
+      toNet: "ADC_D0_N",
+      component: "RT0",
+      metadata: {
+        endpoint: "rx",
+        near: "U_FPGA",
+      },
     });
   });
 });

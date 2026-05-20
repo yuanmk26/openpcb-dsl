@@ -1,9 +1,14 @@
 {
   "kind": "program",
+  "components": [],
+  "packages": [],
+  "devices": [],
   "instances": [
     {
       "kind": "instance",
       "ref": "Inst_U1",
+      "target": "U1",
+      "targetKind": "legacy_component",
       "componentType": "U1",
       "pins": [
         {
@@ -18,7 +23,8 @@
                 "type": "Resistor",
                 "params": {
                   "value": "10k"
-                }
+                },
+                "value": "10k"
               },
               "to": "VCC"
             }
@@ -36,7 +42,8 @@
                 "type": "Resistor",
                 "params": {
                   "value": "22R"
-                }
+                },
+                "value": "22R"
               },
               "to": "net4"
             },
@@ -47,7 +54,8 @@
                 "type": "Capacitor",
                 "params": {
                   "value": "100nF"
-                }
+                },
+                "value": "100nF"
               },
               "to": "GND"
             }

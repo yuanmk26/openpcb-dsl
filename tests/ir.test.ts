@@ -4,6 +4,9 @@ import { addComponent, addPinToNet, createEmptyCircuitIr } from "../src/ir/circu
 describe("circuit ir helpers", () => {
   it("createEmptyCircuitIr returns normalized empty state", () => {
     expect(createEmptyCircuitIr()).toEqual({
+      componentDefs: {},
+      packageDefs: {},
+      deviceDefs: {},
       components: {},
       nets: {},
       patterns: [],

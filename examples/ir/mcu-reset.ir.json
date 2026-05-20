@@ -1,4 +1,7 @@
 {
+  "componentDefs": {},
+  "packageDefs": {},
+  "deviceDefs": {},
   "components": {
     "U1": {
       "ref": "U1",

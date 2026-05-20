@@ -40,6 +40,7 @@ describe("openpcb-dsl cli", () => {
 
     expect(parsed).toMatchObject({
       kind: "program",
+      components: [],
       instances: [
         {
           ref: "U1",
@@ -100,8 +101,31 @@ describe("openpcb-dsl cli", () => {
   });
 
   it("surfaces parser errors from unsupported diff_pair input", () => {
-    const errorOutput = runCliExpectError(["compile", "examples/dsl/adc-lvds.opcb"]);
+    const output = runCli(["compile", "examples/dsl/adc-lvds.opcb"]);
+    const parsed = JSON.parse(output);
 
-    expect(errorOutput).toContain("diff_pair parsing is not supported");
+    expect(parsed.diffPairs.ADC_D0).toMatchObject({
+      pNet: "ADC_D0_P",
+      nNet: "ADC_D0_N",
+    });
+  });
+
+  it("parses vNext files to AST JSON", () => {
+    const output = runCli(["parse", "examples/dsl/vnext-device.opcb"]);
+    const parsed = JSON.parse(output);
+
+    expect(parsed).toMatchObject({
+      components: [{ name: "MCU" }],
+      devices: [{ name: "STM32F103C8T6" }],
+      instances: [{ ref: "U1", targetKind: "device" }],
+    });
+  });
+
+  it("validates a vNext diff_pair file", () => {
+    const output = runCli(["validate", "examples/dsl/vnext-diff-pair.opcb"]);
+    const parsed = JSON.parse(output);
+
+    expect(Array.isArray(parsed)).toBe(true);
+    expect(parsed.find((item: { severity?: string }) => item.severity === "error")).toBeUndefined();
   });
 });

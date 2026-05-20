@@ -1,14 +1,60 @@
+export type PinKind = "in" | "out" | "inout" | "passive" | "power_in" | "power_out";
+
 export interface ProgramAst {
   kind: "program";
+  components: ComponentDefAst[];
+  packages: PackageDefAst[];
+  devices: DeviceDefAst[];
   instances: InstanceAst[];
   diffPairs: DiffPairAst[];
+}
+
+export interface ComponentDefAst {
+  kind: "component_def";
+  name: string;
+  pins: PinDeclAst[];
+  groups?: GroupDeclAst[];
+  attrs?: Record<string, string>;
+}
+
+export interface PinDeclAst {
+  name: string;
+  kind?: PinKind;
+}
+
+export interface GroupDeclAst {
+  name: string;
+  pins: string[];
+}
+
+export interface PackageDefAst {
+  kind: "package_def";
+  name: string;
+  pads: string[];
+}
+
+export interface DeviceDefAst {
+  kind: "device_def";
+  name: string;
+  component: string;
+  package: string;
+  attrs?: Record<string, string>;
+  pinmap: PinmapDeclAst[];
+}
+
+export interface PinmapDeclAst {
+  pin: string;
+  pad: string;
 }
 
 export interface InstanceAst {
   kind: "instance";
   ref: string;
-  componentType: string;
+  target: string;
+  targetKind: "legacy_component" | "device";
+  componentType?: string;
   params?: Record<string, string>;
+  attrs?: Record<string, string>;
   pins: PinExprAst[];
 }
 
@@ -82,6 +128,18 @@ export type PinOperationAst =
   | TapOperationAst
   | BridgeOperationAst;
 
+export interface DiffEndpointBridgeAst {
+  kind: "bridge";
+  component: ComponentExprAst;
+  legs: ["p", "n"];
+}
+
+export interface DiffEndpointAst {
+  name: string;
+  near?: string;
+  bridges: DiffEndpointBridgeAst[];
+}
+
 export interface DiffPairAst {
   kind: "diff_pair";
   name: string;
@@ -89,6 +147,6 @@ export interface DiffPairAst {
   nNet: string;
   pPins: string[];
   nPins: string[];
-  operations?: PinOperationAst[];
+  endpoints?: DiffEndpointAst[];
   constraints?: Record<string, string | boolean>;
 }

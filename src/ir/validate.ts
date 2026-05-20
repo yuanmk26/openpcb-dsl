@@ -58,6 +58,98 @@ export function validateCircuitIr(ir: CircuitIR): Diagnostic[] {
         target: component.type,
       });
     }
+
+    if (component.device) {
+      const deviceDef = ir.deviceDefs[component.device];
+      if (!deviceDef) {
+        diagnostics.push({
+          severity: "error",
+          code: "MISSING_DEVICE_DEF",
+          message: `Instance "${component.ref}" references missing device "${component.device}".`,
+          target: component.ref,
+        });
+        continue;
+      }
+
+      const componentDef = ir.componentDefs[deviceDef.component];
+      if (!componentDef) {
+        diagnostics.push({
+          severity: "error",
+          code: "MISSING_COMPONENT_DEF",
+          message: `Device "${deviceDef.name}" references missing component "${deviceDef.component}".`,
+          target: deviceDef.name,
+        });
+      }
+
+      const packageDef = ir.packageDefs[deviceDef.package];
+      if (!packageDef) {
+        diagnostics.push({
+          severity: "error",
+          code: "MISSING_PACKAGE_DEF",
+          message: `Device "${deviceDef.name}" references missing package "${deviceDef.package}".`,
+          target: deviceDef.name,
+        });
+      }
+
+      if (componentDef) {
+        for (const net of Object.values(ir.nets)) {
+          for (const pinRef of net.pins) {
+            const [ref, pinName] = pinRef.split(".");
+            if (ref === component.ref && !componentDef.pins[pinName]) {
+              diagnostics.push({
+                severity: "error",
+                code: "INVALID_INSTANCE_PIN",
+                message: `Instance "${component.ref}" uses pin "${pinName}" that is not declared by component "${componentDef.name}".`,
+                target: pinRef,
+              });
+            }
+          }
+        }
+      }
+    }
+  }
+
+  for (const [name, deviceDef] of Object.entries(ir.deviceDefs)) {
+    const componentDef = ir.componentDefs[deviceDef.component];
+    const packageDef = ir.packageDefs[deviceDef.package];
+
+    if (!componentDef) {
+      diagnostics.push({
+        severity: "error",
+        code: "MISSING_DEVICE_COMPONENT_DEF",
+        message: `Device "${name}" references missing component "${deviceDef.component}".`,
+        target: name,
+      });
+    }
+
+    if (!packageDef) {
+      diagnostics.push({
+        severity: "error",
+        code: "MISSING_DEVICE_PACKAGE_DEF",
+        message: `Device "${name}" references missing package "${deviceDef.package}".`,
+        target: name,
+      });
+    }
+
+    for (const [pin, pad] of Object.entries(deviceDef.pinmap)) {
+      if (componentDef && !componentDef.pins[pin]) {
+        diagnostics.push({
+          severity: "error",
+          code: "INVALID_DEVICE_PINMAP_PIN",
+          message: `Device "${name}" pinmap references undeclared pin "${pin}".`,
+          target: name,
+        });
+      }
+
+      if (packageDef && !packageDef.pads.includes(pad)) {
+        diagnostics.push({
+          severity: "error",
+          code: "INVALID_DEVICE_PINMAP_PAD",
+          message: `Device "${name}" pinmap references undeclared pad "${pad}".`,
+          target: name,
+        });
+      }
+    }
   }
 
   for (const constraint of ir.constraints) {
@@ -89,6 +181,29 @@ export function validateCircuitIr(ir: CircuitIR): Diagnostic[] {
         target: diffPair.name,
       });
     }
+
+    for (const pin of [...diffPair.pPins, ...diffPair.nPins]) {
+      if (!PIN_REF_PATTERN.test(pin)) {
+        diagnostics.push({
+          severity: "error",
+          code: "INVALID_DIFF_PAIR_PIN_REF",
+          message: `Diff pair "${diffPair.name}" contains invalid pin reference "${pin}".`,
+          target: diffPair.name,
+        });
+      }
+    }
+
+    for (const endpoint of diffPair.endpoints ?? []) {
+      if (endpoint.near && !ir.components[endpoint.near]) {
+        diagnostics.push({
+          severity: "warning",
+          code: "UNKNOWN_DIFF_ENDPOINT_NEAR",
+          message: `Diff pair "${diffPair.name}" endpoint "${endpoint.name}" references unknown near instance "${endpoint.near}".`,
+          target: diffPair.name,
+        });
+      }
+    }
   }
+
   return diagnostics;
 }

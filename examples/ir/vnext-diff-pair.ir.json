@@ -1,0 +1,186 @@
+{
+  "componentDefs": {
+    "AdcOutput": {
+      "name": "AdcOutput",
+      "pins": {
+        "DOUT0_P": {
+          "kind": "out"
+        },
+        "DOUT0_N": {
+          "kind": "out"
+        }
+      }
+    },
+    "FpgaInput": {
+      "name": "FpgaInput",
+      "pins": {
+        "ADC_D0_P": {
+          "kind": "in"
+        },
+        "ADC_D0_N": {
+          "kind": "in"
+        }
+      }
+    }
+  },
+  "packageDefs": {
+    "QFN32": {
+      "name": "QFN32",
+      "pads": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32"
+      ]
+    },
+    "BGA256": {
+      "name": "BGA256",
+      "pads": [
+        "A1",
+        "A2",
+        "B1",
+        "B2"
+      ]
+    }
+  },
+  "deviceDefs": {
+    "ADC_OUT_DEV": {
+      "name": "ADC_OUT_DEV",
+      "component": "AdcOutput",
+      "package": "QFN32",
+      "pinmap": {
+        "DOUT0_P": "5",
+        "DOUT0_N": "6"
+      }
+    },
+    "FPGA_IN_DEV": {
+      "name": "FPGA_IN_DEV",
+      "component": "FpgaInput",
+      "package": "BGA256",
+      "pinmap": {
+        "ADC_D0_P": "A1",
+        "ADC_D0_N": "A2"
+      }
+    }
+  },
+  "components": {
+    "U_ADC": {
+      "ref": "U_ADC",
+      "type": "ADC_OUT_DEV",
+      "device": "ADC_OUT_DEV",
+      "component": "AdcOutput",
+      "package": "QFN32"
+    },
+    "U_FPGA": {
+      "ref": "U_FPGA",
+      "type": "FPGA_IN_DEV",
+      "device": "FPGA_IN_DEV",
+      "component": "FpgaInput",
+      "package": "BGA256"
+    },
+    "RT0": {
+      "ref": "RT0",
+      "type": "Resistor",
+      "value": "100R",
+      "footprint": "R_0402",
+      "params": {
+        "value": "100R",
+        "package": "R_0402"
+      }
+    }
+  },
+  "nets": {
+    "ADC_D0_P": {
+      "name": "ADC_D0_P",
+      "pins": [
+        "U_ADC.DOUT0_P",
+        "U_FPGA.ADC_D0_P",
+        "RT0.1"
+      ]
+    },
+    "ADC_D0_N": {
+      "name": "ADC_D0_N",
+      "pins": [
+        "U_ADC.DOUT0_N",
+        "U_FPGA.ADC_D0_N",
+        "RT0.2"
+      ]
+    }
+  },
+  "patterns": [
+    {
+      "kind": "bridge",
+      "fromNet": "ADC_D0_P",
+      "toNet": "ADC_D0_N",
+      "component": "RT0",
+      "metadata": {
+        "endpoint": "rx",
+        "near": "U_FPGA"
+      }
+    }
+  ],
+  "diffPairs": {
+    "ADC_D0": {
+      "name": "ADC_D0",
+      "pNet": "ADC_D0_P",
+      "nNet": "ADC_D0_N",
+      "pPins": [
+        "U_ADC.DOUT0_P",
+        "U_FPGA.ADC_D0_P"
+      ],
+      "nPins": [
+        "U_ADC.DOUT0_N",
+        "U_FPGA.ADC_D0_N"
+      ],
+      "endpoints": [
+        {
+          "name": "rx",
+          "near": "U_FPGA",
+          "bridges": [
+            {
+              "component": "RT0",
+              "legs": [
+                "p",
+                "n"
+              ]
+            }
+          ]
+        }
+      ],
+      "constraints": {
+        "differentialImpedance": "100ohm",
+        "intraPairLengthMatch": "within_0p2mm",
+        "routeTogether": true
+      }
+    }
+  },
+  "constraints": []
+}

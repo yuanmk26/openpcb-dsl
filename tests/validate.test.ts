@@ -1,6 +1,12 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { createEmptyCircuitIr } from "../src/ir/circuit-ir";
 import { validateCircuitIr } from "../src/ir/validate";
+import { compileOpenPcbDsl } from "../src/parser/parse";
+
+function readFixture(relativePath: string): string {
+  return readFileSync(new URL(`../${relativePath}`, import.meta.url), "utf8");
+}
 
 describe("validateCircuitIr", () => {
   it("reports single-pin nets as warnings", () => {
@@ -78,5 +84,97 @@ describe("validateCircuitIr", () => {
       message: 'Component "R1" is defined with conflicting properties.',
       target: "R1",
     });
+  });
+
+  it("reports invalid device pinmap definitions", () => {
+    const ir = compileOpenPcbDsl(`
+component MCU {
+  pins {
+    NRST: in
+  }
+}
+
+package DIP1 {
+  pads { 1 }
+}
+
+device BROKEN_DEV : MCU @ DIP1 {
+  pinmap {
+    BOOT0 -> 2
+  }
+}
+`);
+
+    const diagnostics = validateCircuitIr(ir);
+
+    expect(diagnostics).toContainEqual(
+      expect.objectContaining({
+        severity: "error",
+        code: "INVALID_DEVICE_PINMAP_PIN",
+      }),
+    );
+    expect(diagnostics).toContainEqual(
+      expect.objectContaining({
+        severity: "error",
+        code: "INVALID_DEVICE_PINMAP_PAD",
+      }),
+    );
+  });
+
+  it("reports missing device references from vNext instances", () => {
+    const ir = compileOpenPcbDsl(`
+inst U1 MissingDevice {
+}
+`);
+
+    const diagnostics = validateCircuitIr(ir);
+
+    expect(diagnostics).toContainEqual(
+      expect.objectContaining({
+        severity: "error",
+        code: "MISSING_DEVICE_DEF",
+        target: "U1",
+      }),
+    );
+  });
+
+  it("reports invalid vNext instance pins against component definitions", () => {
+    const ir = compileOpenPcbDsl(`
+component MCU {
+  pins {
+    NRST: in
+  }
+}
+
+package DIP1 {
+  pads { 1 }
+}
+
+device MCU_DEV : MCU @ DIP1 {
+  pinmap {
+    NRST -> 1
+  }
+}
+
+inst U1 MCU_DEV {
+  BOOT0.Node(RESET)
+}
+`);
+
+    const diagnostics = validateCircuitIr(ir);
+
+    expect(diagnostics).toContainEqual(
+      expect.objectContaining({
+        severity: "error",
+        code: "INVALID_INSTANCE_PIN",
+      }),
+    );
+  });
+
+  it("accepts valid vNext diff_pair inputs", () => {
+    const ir = compileOpenPcbDsl(readFixture("examples/dsl/vnext-diff-pair.opcb"));
+    const diagnostics = validateCircuitIr(ir);
+
+    expect(diagnostics.find((item) => item.severity === "error")).toBeUndefined();
   });
 });

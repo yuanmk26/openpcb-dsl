@@ -1,0 +1,56 @@
+component AdcOutput {
+  pins {
+    DOUT0_P: out
+    DOUT0_N: out
+  }
+}
+
+component FpgaInput {
+  pins {
+    ADC_D0_P: in
+    ADC_D0_N: in
+  }
+}
+
+package QFN32 {
+  pads { 1..32 }
+}
+
+package BGA256 {
+  pads { A1, A2, B1, B2 }
+}
+
+device ADC_OUT_DEV : AdcOutput @ QFN32 {
+  pinmap {
+    DOUT0_P -> 5
+    DOUT0_N -> 6
+  }
+}
+
+device FPGA_IN_DEV : FpgaInput @ BGA256 {
+  pinmap {
+    ADC_D0_P -> A1
+    ADC_D0_N -> A2
+  }
+}
+
+inst U_ADC ADC_OUT_DEV {
+}
+
+inst U_FPGA FPGA_IN_DEV {
+}
+
+diff_pair ADC_D0 {
+  p: U_ADC.DOUT0_P -> node ADC_D0_P -> U_FPGA.ADC_D0_P
+  n: U_ADC.DOUT0_N -> node ADC_D0_N -> U_FPGA.ADC_D0_N
+
+  endpoint rx near U_FPGA {
+    bridge RT0 Resistor(value=100R, package=R_0402) between p, n
+  }
+
+  constraint {
+    differential_impedance 100ohm
+    intra_pair_length_match within_0p2mm
+    route_together true
+  }
+}

@@ -14,10 +14,15 @@ describe("parseOpenPcbDsl", () => {
 
     expect(ast).toMatchObject({
       kind: "program",
+      components: [],
+      packages: [],
+      devices: [],
       diffPairs: [],
       instances: [
         {
           ref: "U1",
+          target: "MCU",
+          targetKind: "legacy_component",
           componentType: "MCU",
           pins: [
             {
@@ -30,6 +35,7 @@ describe("parseOpenPcbDsl", () => {
                     ref: "R1",
                     type: "Resistor",
                     params: { value: "10k" },
+                    value: "10k",
                   },
                   to: "3V3",
                 },
@@ -39,6 +45,7 @@ describe("parseOpenPcbDsl", () => {
                     ref: "C1",
                     type: "Capacitor",
                     params: { value: "100nF" },
+                    value: "100nF",
                   },
                   to: "GND",
                 },
@@ -72,11 +79,16 @@ TP1 TestPoint(
 
     expect(parseOpenPcbDsl(source)).toEqual({
       kind: "program",
+      components: [],
+      packages: [],
+      devices: [],
       diffPairs: [],
       instances: [
         {
           kind: "instance",
           ref: "TP1",
+          target: "TestPoint",
+          targetKind: "legacy_component",
           componentType: "TestPoint",
           pins: [
             {
@@ -98,6 +110,7 @@ TP1 TestPoint(
                     ref: "R1",
                     type: "Resistor",
                     params: { value: "100k" },
+                    value: "100k",
                   },
                   to: "GND",
                 },
@@ -114,6 +127,8 @@ TP1 TestPoint(
                     ref: "R2",
                     type: "Resistor",
                     params: { value: "22R", footprint: "0402" },
+                    value: "22R",
+                    footprint: "0402",
                   },
                   to: "ADC_IN",
                 },
@@ -132,12 +147,115 @@ TP1 TestPoint(
     expect(compileOpenPcbDsl(source)).toEqual(compileAstToIr(ast));
   });
 
-  it("rejects unsupported diff_pair syntax", () => {
+  it("parses vNext component/package/device/inst syntax", () => {
+    const source = readFixture("examples/dsl/vnext-device.opcb");
+
+    expect(parseOpenPcbDsl(source)).toMatchObject({
+      kind: "program",
+      components: [
+        expect.objectContaining({
+          name: "MCU",
+          pins: expect.arrayContaining([
+            expect.objectContaining({ name: "NRST", kind: "in" }),
+            expect.objectContaining({ name: "PA0", kind: "inout" }),
+          ]),
+        }),
+      ],
+      packages: [
+        expect.objectContaining({
+          name: "LQFP48",
+          pads: expect.arrayContaining(["1", "2", "3"]),
+        }),
+      ],
+      devices: [
+        {
+          name: "STM32F103C8T6",
+          component: "MCU",
+          package: "LQFP48",
+        },
+      ],
+      instances: [
+        {
+          ref: "U1",
+          target: "STM32F103C8T6",
+          targetKind: "device",
+          attrs: {
+            role: "control",
+          },
+        },
+      ],
+    });
+  });
+
+  it("parses diff_pair, endpoint near, bridge, and constraints", () => {
     const source = readFixture("examples/dsl/adc-lvds.opcb");
 
-    expect(() => parseOpenPcbDsl(source)).toThrow(
-      "diff_pair parsing is not supported in the first parser version.",
-    );
+    expect(parseOpenPcbDsl(source)).toMatchObject({
+      kind: "program",
+      diffPairs: [
+        {
+          name: "ADC_D0",
+          pNet: "ADC_D0_P",
+          nNet: "ADC_D0_N",
+          endpoints: [
+            {
+              name: "rx",
+              near: "U_FPGA",
+              bridges: [
+                {
+                  component: {
+                    ref: "RT0",
+                    type: "Resistor",
+                  },
+                },
+              ],
+            },
+          ],
+          constraints: {
+            differentialImpedance: "100ohm",
+            intraPairLengthMatch: "within 0.2mm",
+            routeTogether: true,
+          },
+        },
+      ],
+    });
+  });
+
+  it("supports mixing legacy instances with vNext definitions", () => {
+    const source = `
+component MCU {
+  pins {
+    NRST: in
+  }
+}
+
+package DIP1 {
+  pads { 1 }
+}
+
+device MCU_DEV : MCU @ DIP1 {
+  pinmap {
+    NRST -> 1
+  }
+}
+
+inst U1 MCU_DEV {
+  NRST.Node(RESET)
+}
+
+TP1 TestPoint(
+  P1.Node(RESET)
+);
+`;
+
+    expect(parseOpenPcbDsl(source)).toMatchObject({
+      components: [{ name: "MCU" }],
+      devices: [{ name: "MCU_DEV" }],
+      instances: [
+        { ref: "U1", targetKind: "device" },
+        { ref: "TP1", targetKind: "legacy_component", componentType: "TestPoint" },
+      ],
+    });
   });
 
   it("rejects unknown operations", () => {
