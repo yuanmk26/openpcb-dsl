@@ -119,7 +119,7 @@ vNext 的目标不是推翻当前 pin-centered 表达，而是在它上面补齐
 如果把 `footprint` 或 `package` 主要留到实例阶段再传，例如：
 
 ```opcb
-inst U1: MCU {
+inst U1 MCU {
   footprint = LQFP48
 }
 ```
@@ -177,7 +177,7 @@ PinmapSection      ::= "pinmap" "{" PinmapDecl* "}"
 PinmapDecl         ::= Identifier "->" PadRef [ "," ]
 PadRef             ::= Integer | Identifier
 
-InstanceDef        ::= "inst" Identifier ":" Identifier "{"
+InstanceDef        ::= "inst" Identifier Identifier "{"
                        InstanceBody
                        "}"
 InstanceBody       ::= (InstanceAttrDecl | PinExpr | DiffEndpointBlock)*
@@ -271,7 +271,7 @@ device STM32F103C8T6 : MCU @ LQFP48 {
   }
 }
 
-inst U1: STM32F103C8T6 {
+inst U1 STM32F103C8T6 {
   NRST.Node(RESET)
     .PullUp(R1: Resistor(value=10k, package=R_0402), to=3V3)
 
@@ -312,7 +312,7 @@ diff_pair ADC_D0 {
 当前 DSL 与 vNext 之间建议这样理解：
 
 - 当前 `U1 MCU(...)` 仍然是已实现、可用的写法
-- vNext 推荐改为 `inst U1: SomeDevice { ... }`
+- vNext 推荐改为 `inst U1 SomeDevice { ... }`
 - 当前内联辅助元件 `R1 Resistor(value=10k)` 的表达方式，在 vNext 中可继续保留为语法糖
 - 该语法糖在语义上应被归一到某个 `device`，而不是长期停留在“实例时临时拼装器件”的层面
 
