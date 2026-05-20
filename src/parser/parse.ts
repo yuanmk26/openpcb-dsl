@@ -6,6 +6,7 @@ import type {
   DiffEndpointAst,
   DiffPairAst,
   GroupDeclAst,
+  ImportAst,
   InstanceAst,
   PackageDefAst,
   PinDeclAst,
@@ -23,6 +24,7 @@ import type { CircuitIR } from "../ir/circuit-ir";
 
 type TokenKind =
   | "word"
+  | "string"
   | "."
   | "("
   | ")"
@@ -118,6 +120,15 @@ class Lexer {
     }
 
     const char = this.peek();
+    if (char === "\"") {
+      return {
+        kind: "string",
+        text: this.readString(),
+        line,
+        column,
+      };
+    }
+
     if (this.isPunctuation(char)) {
       this.advance();
       return {
@@ -135,6 +146,44 @@ class Lexer {
       line,
       column,
     };
+  }
+
+  private readString(): string {
+    let value = "";
+    this.advance();
+
+    while (!this.isAtEnd()) {
+      const char = this.peek();
+      if (char === "\"") {
+        this.advance();
+        return value;
+      }
+
+      if (char === "\\") {
+        this.advance();
+        const escaped = this.peek();
+        if (!escaped) {
+          break;
+        }
+        if (escaped === "\"" || escaped === "\\") {
+          value += escaped;
+        } else {
+          value += escaped;
+        }
+        this.advance();
+        continue;
+      }
+
+      value += char;
+      this.advance();
+    }
+
+    throw new OpenPcbParserError("Unterminated string literal", {
+      kind: "string",
+      text: value,
+      line: this.line,
+      column: this.column,
+    });
   }
 
   private readWord(): string {
@@ -217,6 +266,7 @@ class Parser {
   constructor(private readonly tokens: Token[]) {}
 
   parseProgram(): ProgramAst {
+    const imports: ImportAst[] = [];
     const components: ComponentDefAst[] = [];
     const packages: PackageDefAst[] = [];
     const devices: DeviceDefAst[] = [];
@@ -224,7 +274,9 @@ class Parser {
     const diffPairs: DiffPairAst[] = [];
 
     while (!this.isAtEnd()) {
-      if (this.checkWord("component")) {
+      if (this.checkWord("import")) {
+        imports.push(this.parseImport());
+      } else if (this.checkWord("component")) {
         components.push(this.parseComponentDef());
       } else if (this.checkWord("package")) {
         packages.push(this.parsePackageDef());
@@ -242,11 +294,21 @@ class Parser {
 
     return {
       kind: "program",
+      imports,
       components,
       packages,
       devices,
       instances,
       diffPairs,
+    };
+  }
+
+  private parseImport(): ImportAst {
+    this.expectWordValue("import");
+    const path = this.expectString("import path");
+    return {
+      kind: "import",
+      path,
     };
   }
 
@@ -823,6 +885,10 @@ class Parser {
     }
     this.index += 1;
     return token;
+  }
+
+  private expectString(label: string): string {
+    return this.expectToken("string", label).text;
   }
 
   private match(kind: Exclude<TokenKind, "word" | "eof">): boolean {

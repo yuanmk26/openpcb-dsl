@@ -2,36 +2,51 @@
 
 ## 为什么拆成独立库
 
-`openpcb-dsl` 是 OpenPCB 生态中的编译核心。这个编译层需要具备确定性、可测试性和可复用性，因此不适合直接嵌入某一个具体产品界面，而应作为独立 TypeScript 库存在。
+`openpcb-dsl` 是 OpenPCB 生态中的编译核心。它需要保持确定性、可测试性和可复用性，因此不直接绑定某个具体产品界面，而是作为独立 TypeScript 库存在。
 
-这样拆分后，语义模型可以保持稳定，而上层工具可以分别演进，不必把编译逻辑和界面、导出器或 agent 行为耦合在一起。
+## 与其他模块的关系
 
-## 与其他 OpenPCB 模块的关系
-
-- OpenPCB agent：生成或编辑 DSL / AST，并消费 diagnostics 或 IR。
-- OpenPCB GUI：展示 IR、执行校验，后续也可能承载交互式编辑。
-- VSCode 插件：提供语法感知、诊断和预览能力。
-- KiCad exporter：消费规范化后的 IR，而不是直接依赖某种文本拼装结果。
-- tscircuit / Circuit JSON exporter：把同一份 IR 映射到不同下游表示。
+- OpenPCB agent：生成或编辑 DSL / AST，并消费 diagnostics 或 IR
+- OpenPCB GUI：展示 IR、执行校验，后续也可承载交互式编辑
+- VSCode 插件：提供语法感知、诊断和预览
+- 导出器：消费统一的 `CircuitIR`
 
 ## 分层职责
 
+### 文件加载层
+
+多文件模式下，新增一个“文件加载与合并”阶段：
+
+`entry file -> parse per file -> expand imports -> merge ProgramAst -> compileAstToIr`
+
+职责包括：
+
+- 读取入口文件
+- 解析顶层 `import`
+- 按当前文件目录解析相对路径
+- 递归加载被导入文件
+- 检测循环导入
+- 限制被导入文件只能包含定义层内容
+- 检查重复定义冲突
+
 ### AST
 
-AST 保留接近语法层的用户意图表示。它应该能够表达 `Node`、`PullUp`、`Series`、`Shunt` 这类 pin-centered 操作，但此时还不需要先压平成最终 netlist。
+AST 保留接近语法层的用户意图表示。它表达 `component / package / device / inst / diff_pair` 以及顶层 `import`，但不负责文件系统语义。
 
 ### Compiler
 
-Compiler 负责把 AST 降级为规范化的 `CircuitIR`。它会把高层 pin operation 展开成明确的辅助元件、net 成员和 pattern 元数据。
+Compiler 负责把 AST lowering 为规范化的 `CircuitIR`。它不处理 `import` 路径，只处理已经合并完成的 `ProgramAst`。
 
 ### IR
 
-IR 是验证、导出和后续优化步骤共享的稳定中间层。它同时保留底层 netlist 事实和更高层的 pattern 信息。
+IR 是验证、导出和后续优化步骤共享的稳定中间层，同时保留定义层事实与设计层事实。
 
 ### Emitters
 
-Emitter 负责把 IR 转换为下游目标格式。MVP-0 阶段这些输出都刻意保持保守和初步，不会伪造尚未确认的目标语义。
+Emitter 负责把 IR 转换为下游目标格式。当前输出仍偏早期映射，不补充尚未确认的目标语义。
 
-## 当前设计边界
+## 当前边界
 
-MVP-0 有意不实现真实 parser。因为语法表面还在演进，但语义中间层已经可以先定义并测试。这样可以让上游和下游模块先围绕 AST、IR、diagnostics 和 emitter 集成，而不用等待最终文本语法完全定稿。
+- 字符串入口 `parseOpenPcbDsl(source)` / `compileOpenPcbDsl(source)` 仍只处理单段文本
+- 文件入口 `parseOpenPcbDslFile(path)` / `compileOpenPcbDslFile(path)` 负责展开定义层导入
+- 多文件能力只覆盖定义层复用，不覆盖设计层拆分

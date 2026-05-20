@@ -1,0 +1,11 @@
+import "./vnext-device.defs.opcb"
+
+inst U1 STM32F103C8T6 {
+  role = control
+
+  NRST.Node(RESET)
+    .PullUp(R1 Resistor(value=10k, package=R_0402), to=3V3)
+    .Shunt(C1 Capacitor(value=100nF, package=C_0402), to=GND)
+
+  PA0.Node(ADC_IN)
+}

@@ -1,17 +1,17 @@
 # 语法设计
 
-## 状态说明
+## 当前状态
 
-当前仓库已经同时支持：
+当前仓库同时支持：
 
 - legacy pin-centered DSL
 - vNext 定义层 DSL
 
 推荐策略：
 
-- 旧语法继续兼容
+- legacy 语法继续兼容
 - 新语法作为推荐写法
-- 所有“实例化”语义统一使用空格分隔，不使用 `:`
+- 实例化统一使用空格分隔，不使用 `:`
 
 例如：
 
@@ -21,7 +21,7 @@
 
 ## legacy 语法
 
-legacy 语法仍然保留，适合快速描述从某个 pin 出发的连接关系。
+legacy 语法仍适合快速描述从某个 pin 出发的连接关系：
 
 ```opcb
 U1 MCU(
@@ -31,7 +31,7 @@ U1 MCU(
 );
 ```
 
-已支持的 pin 操作：
+当前支持的 pin 操作：
 
 - `PullUp`
 - `PullDown`
@@ -43,7 +43,7 @@ U1 MCU(
 
 ## vNext 语法
 
-vNext 引入了定义层，把“电气接口”“物理封装”“具体器件”“设计实例”分开表达：
+vNext 把“电气接口”“物理封装”“具体器件”“设计实例”分开表达：
 
 - `component`：定义 pin 接口
 - `package`：定义 pad 集合
@@ -98,6 +98,46 @@ inst U1 STM32F103C8T6 {
 - `STM32F103C8T6` 是可实例化的具体器件
 - `U1` 是设计中的实际实例
 
+### `import`
+
+多文件模式只用于复用定义层：
+
+```opcb
+import "./libs/mcu.defs.opcb"
+
+inst U1 MCU_DEV {
+  NRST.Node(RESET)
+}
+```
+
+被导入文件示例：
+
+```opcb
+component MCU {
+  pins {
+    NRST: in
+  }
+}
+
+package DIP1 {
+  pads { 1 }
+}
+
+device MCU_DEV : MCU @ DIP1 {
+  pinmap {
+    NRST -> 1
+  }
+}
+```
+
+当前规则：
+
+- `import` 只允许顶层使用
+- 入口文件可以同时包含 `import`、定义层和设计层内容
+- 被导入文件只允许 `import / component / package / device`
+- 同名 `component / package / device` 直接报错
+- 不支持 `import as`、命名空间、覆盖和远程路径
+
 ### `diff_pair`
 
 ```opcb
@@ -116,13 +156,6 @@ diff_pair ADC_D0 {
   }
 }
 ```
-
-当前实现会：
-
-- 把 `pPins/nPins` 挂到各自 net
-- 把 `bridge` 落为 `PatternIR.kind = "bridge"`
-- 把 `endpoint` 与 `near` 信息保留在 AST / IR 中
-- 把 snake_case 约束名规范化到内部 camelCase 字段
 
 ## 语法要点
 
@@ -144,9 +177,7 @@ diff_pair ADC_D0 {
 
 无论 legacy 还是 vNext `inst`，单 pin 连接表达仍从 `Pin.Node(net)` 开始。
 
-### 3. 新旧语法可混写
-
-下面这种文件是合法的：
+### 3. 新旧语法可以混用
 
 ```opcb
 component MCU {
@@ -178,15 +209,16 @@ TP1 TestPoint(
 
 当前文本 parser 已支持：
 
-- legacy 顶层实例：`Ref Type(...)`
-- `component / package / device / inst / diff_pair`
+- legacy 顶层实例 `Ref Type(...)`
+- `import / component / package / device / inst / diff_pair`
 - `Bridge` 与 `bridge`
 - `endpoint ... near ...`
 - `1..48` 这类 pad range
 - `#` 注释和 `//` 注释
 
-当前不打算在本轮实现的内容：
+当前不打算在这一轮实现：
 
 - 更复杂的字符串字面量系统
-- 布局级几何语义
+- 通用模块系统
+- 设计层文件拆分
 - 需要先定义辅助元件再引用的强制器件库流程

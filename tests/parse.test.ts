@@ -1,10 +1,25 @@
-import { readFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { compileAstToIr } from "../src/compiler/ast-to-ir";
+import { compileOpenPcbDslFile, parseOpenPcbDslFile } from "../src/parser/load";
 import { compileOpenPcbDsl, parseOpenPcbDsl } from "../src/parser/parse";
 
 function readFixture(relativePath: string): string {
   return readFileSync(new URL(`../${relativePath}`, import.meta.url), "utf8");
+}
+
+function createTempProject(files: Record<string, string>): string {
+  const root = mkdtempSync(join(tmpdir(), "openpcb-dsl-"));
+
+  for (const [relativePath, content] of Object.entries(files)) {
+    const fullPath = join(root, relativePath);
+    mkdirSync(dirname(fullPath), { recursive: true });
+    writeFileSync(fullPath, content, "utf8");
+  }
+
+  return root;
 }
 
 describe("parseOpenPcbDsl", () => {
@@ -14,6 +29,7 @@ describe("parseOpenPcbDsl", () => {
 
     expect(ast).toMatchObject({
       kind: "program",
+      imports: [],
       components: [],
       packages: [],
       devices: [],
@@ -79,6 +95,7 @@ TP1 TestPoint(
 
     expect(parseOpenPcbDsl(source)).toEqual({
       kind: "program",
+      imports: [],
       components: [],
       packages: [],
       devices: [],
@@ -152,6 +169,7 @@ TP1 TestPoint(
 
     expect(parseOpenPcbDsl(source)).toMatchObject({
       kind: "program",
+      imports: [],
       components: [
         expect.objectContaining({
           name: "MCU",
@@ -192,6 +210,7 @@ TP1 TestPoint(
 
     expect(parseOpenPcbDsl(source)).toMatchObject({
       kind: "program",
+      imports: [],
       diffPairs: [
         {
           name: "ADC_D0",
@@ -249,6 +268,7 @@ TP1 TestPoint(
 `;
 
     expect(parseOpenPcbDsl(source)).toMatchObject({
+      imports: [],
       components: [{ name: "MCU" }],
       devices: [{ name: "MCU_DEV" }],
       instances: [
@@ -256,6 +276,35 @@ TP1 TestPoint(
         { ref: "TP1", targetKind: "legacy_component", componentType: "TestPoint" },
       ],
     });
+  });
+
+  it("parses top-level imports with string paths", () => {
+    const source = `
+import "./libs/mcu.defs.opcb"
+import "./libs/passives.defs.opcb"
+
+inst U1 MCU_DEV {
+}
+`;
+
+    expect(parseOpenPcbDsl(source)).toMatchObject({
+      kind: "program",
+      imports: [
+        { kind: "import", path: "./libs/mcu.defs.opcb" },
+        { kind: "import", path: "./libs/passives.defs.opcb" },
+      ],
+      instances: [{ ref: "U1", target: "MCU_DEV" }],
+    });
+  });
+
+  it("rejects import inside a component body", () => {
+    const source = `
+component MCU {
+  import "./defs.opcb"
+}
+`;
+
+    expect(() => parseOpenPcbDsl(source)).toThrow(/Unsupported component section "import"/);
   });
 
   it("rejects unknown operations", () => {
@@ -300,5 +349,170 @@ U1 MCU(
 `;
 
     expect(() => parseOpenPcbDsl(source)).toThrow("Expected component type");
+  });
+});
+
+describe("parseOpenPcbDslFile", () => {
+  it("loads imported definition files and merges their AST", () => {
+    const root = createTempProject({
+      "libs/mcu.defs.opcb": `
+component MCU {
+  pins {
+    NRST: in
+  }
+}
+
+package DIP1 {
+  pads { 1 }
+}
+
+device MCU_DEV : MCU @ DIP1 {
+  pinmap {
+    NRST -> 1
+  }
+}
+`,
+      "board.opcb": `
+import "./libs/mcu.defs.opcb"
+
+inst U1 MCU_DEV {
+  NRST.Node(RESET)
+}
+`,
+    });
+
+    const ast = parseOpenPcbDslFile(join(root, "board.opcb"));
+
+    expect(ast).toMatchObject({
+      kind: "program",
+      imports: [],
+      components: [{ name: "MCU" }],
+      packages: [{ name: "DIP1" }],
+      devices: [{ name: "MCU_DEV" }],
+      instances: [{ ref: "U1", target: "MCU_DEV" }],
+    });
+  });
+
+  it("supports nested imports and compiles through the file API", () => {
+    const root = createTempProject({
+      "libs/base.defs.opcb": `
+component MCU {
+  pins {
+    NRST: in
+  }
+}
+`,
+      "libs/device.defs.opcb": `
+import "./base.defs.opcb"
+
+package DIP1 {
+  pads { 1 }
+}
+
+device MCU_DEV : MCU @ DIP1 {
+  pinmap {
+    NRST -> 1
+  }
+}
+`,
+      "board.opcb": `
+import "./libs/device.defs.opcb"
+
+inst U1 MCU_DEV {
+  NRST.Node(RESET)
+}
+`,
+    });
+
+    const ir = compileOpenPcbDslFile(join(root, "board.opcb"));
+
+    expect(ir.deviceDefs.MCU_DEV).toMatchObject({
+      component: "MCU",
+      package: "DIP1",
+    });
+    expect(ir.components.U1).toMatchObject({
+      device: "MCU_DEV",
+      component: "MCU",
+      package: "DIP1",
+    });
+  });
+
+  it("rejects imported files that contain design instances", () => {
+    const root = createTempProject({
+      "libs/invalid.defs.opcb": `
+inst U1 MCU_DEV {
+}
+`,
+      "board.opcb": `
+import "./libs/invalid.defs.opcb"
+`,
+    });
+
+    expect(() => parseOpenPcbDslFile(join(root, "board.opcb"))).toThrow(
+      /may only contain import\/component\/package\/device declarations/,
+    );
+  });
+
+  it("reports duplicate definitions across files", () => {
+    const root = createTempProject({
+      "libs/a.defs.opcb": `
+component MCU {
+  pins {
+    NRST: in
+  }
+}
+`,
+      "libs/b.defs.opcb": `
+component MCU {
+  pins {
+    PA0: inout
+  }
+}
+`,
+      "board.opcb": `
+import "./libs/a.defs.opcb"
+import "./libs/b.defs.opcb"
+`,
+    });
+
+    expect(() => parseOpenPcbDslFile(join(root, "board.opcb"))).toThrow(/Duplicate component definition "MCU"/);
+  });
+
+  it("reports circular imports", () => {
+    const root = createTempProject({
+      "libs/a.defs.opcb": `
+import "./b.defs.opcb"
+
+component A {
+  pins {
+    P1: in
+  }
+}
+`,
+      "libs/b.defs.opcb": `
+import "./a.defs.opcb"
+
+component B {
+  pins {
+    P1: in
+  }
+}
+`,
+      "board.opcb": `
+import "./libs/a.defs.opcb"
+`,
+    });
+
+    expect(() => parseOpenPcbDslFile(join(root, "board.opcb"))).toThrow(/Detected circular import/);
+  });
+
+  it("reports missing imported files", () => {
+    const root = createTempProject({
+      "board.opcb": `
+import "./libs/missing.defs.opcb"
+`,
+    });
+
+    expect(() => parseOpenPcbDslFile(join(root, "board.opcb"))).toThrow(/Failed to read imported file/);
   });
 });

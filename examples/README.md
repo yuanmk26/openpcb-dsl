@@ -3,15 +3,19 @@
 示例目录按编译阶段组织：
 
 - `dsl/`：DSL 输入样例
-- `ast/`：当前编译器可直接消费的 AST 样例
-- `ir/`：IR 快照或说明性样例
-- `emitters/tscircuit-tsx/`：TSX 输出样例
-- `emitters/circuit-json/`：Circuit JSON 输出样例
+- `dsl/imports/`：多文件定义层导入样例
+- `ast/`：AST 快照
+- `ir/`：IR 快照
+- `emitters/`：导出器输出样例
 
-当前仓库已经在 `dsl/`、`ast/` 和 `ir/` 下提供实际示例文件。
+当前新增的导入示例：
 
-注意：
+- `examples/dsl/imports/vnext-device.defs.opcb`
+- `examples/dsl/imports/vnext-device-board.opcb`
+- `examples/ast/vnext-device-imports.ast.json`
+- `examples/ir/vnext-device-imports.ir.json`
 
-- `ast/` 下的文件当前是手工维护的结构化输入，不是 `.opcb` parser 自动生成的产物。
-- `ir/` 下的快照建议通过 `openpcb-dsl compile <input.opcb> --pretty` 重新生成，以保证和当前 lowering 行为一致。
-- 其余目录仍作为后续阶段产物的预留位置。
+说明：
+
+- `ast/` 下文件是结构化快照，便于协作者理解 parser 输出
+- `ir/` 下文件建议通过 `openpcb-dsl compile <input.opcb> --pretty` 重新生成，以保证与当前 lowering 行为一致

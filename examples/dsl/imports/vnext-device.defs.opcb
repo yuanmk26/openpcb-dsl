@@ -1,0 +1,26 @@
+component MCU {
+  pins {
+    NRST: in
+    PA0: inout
+    VDD: power_in
+    GND: power_in
+  }
+}
+
+package LQFP48 {
+  pads { 1..48 }
+}
+
+device STM32F103C8T6 : MCU @ LQFP48 {
+  attrs {
+    mfr = ST
+    mpn = STM32F103C8T6
+  }
+
+  pinmap {
+    NRST -> 7
+    PA0 -> 10
+    VDD -> 24
+    GND -> 23
+  }
+}

@@ -1,0 +1,169 @@
+{
+  "componentDefs": {
+    "MCU": {
+      "name": "MCU",
+      "pins": {
+        "NRST": {
+          "kind": "in"
+        },
+        "PA0": {
+          "kind": "inout"
+        },
+        "VDD": {
+          "kind": "power_in"
+        },
+        "GND": {
+          "kind": "power_in"
+        }
+      }
+    }
+  },
+  "packageDefs": {
+    "LQFP48": {
+      "name": "LQFP48",
+      "pads": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48"
+      ]
+    }
+  },
+  "deviceDefs": {
+    "STM32F103C8T6": {
+      "name": "STM32F103C8T6",
+      "component": "MCU",
+      "package": "LQFP48",
+      "attrs": {
+        "mfr": "ST",
+        "mpn": "STM32F103C8T6"
+      },
+      "pinmap": {
+        "NRST": "7",
+        "PA0": "10",
+        "VDD": "24",
+        "GND": "23"
+      }
+    }
+  },
+  "components": {
+    "U1": {
+      "ref": "U1",
+      "type": "STM32F103C8T6",
+      "device": "STM32F103C8T6",
+      "component": "MCU",
+      "package": "LQFP48",
+      "attrs": {
+        "role": "control"
+      }
+    },
+    "R1": {
+      "ref": "R1",
+      "type": "Resistor",
+      "value": "10k",
+      "footprint": "R_0402",
+      "params": {
+        "value": "10k",
+        "package": "R_0402"
+      }
+    },
+    "C1": {
+      "ref": "C1",
+      "type": "Capacitor",
+      "value": "100nF",
+      "footprint": "C_0402",
+      "params": {
+        "value": "100nF",
+        "package": "C_0402"
+      }
+    }
+  },
+  "nets": {
+    "RESET": {
+      "name": "RESET",
+      "pins": [
+        "U1.NRST",
+        "R1.1",
+        "C1.1"
+      ]
+    },
+    "3V3": {
+      "name": "3V3",
+      "pins": [
+        "R1.2"
+      ]
+    },
+    "GND": {
+      "name": "GND",
+      "pins": [
+        "C1.2"
+      ]
+    },
+    "ADC_IN": {
+      "name": "ADC_IN",
+      "pins": [
+        "U1.PA0"
+      ]
+    }
+  },
+  "patterns": [
+    {
+      "kind": "pullup",
+      "fromNet": "RESET",
+      "toNet": "3V3",
+      "component": "R1"
+    },
+    {
+      "kind": "shunt",
+      "fromNet": "RESET",
+      "toNet": "GND",
+      "component": "C1"
+    }
+  ],
+  "diffPairs": {},
+  "constraints": []
+}

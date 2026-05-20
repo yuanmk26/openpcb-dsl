@@ -10,6 +10,7 @@ function readFixture(relativePath: string): string {
 
 const ast: ProgramAst = {
   kind: "program",
+  imports: [],
   components: [],
   packages: [],
   devices: [],

@@ -121,6 +121,21 @@ describe("openpcb-dsl cli", () => {
     });
   });
 
+  it("expands imported definition files from the CLI entry file", () => {
+    const output = runCli(["compile", "examples/dsl/imports/vnext-device-board.opcb"]);
+    const parsed = JSON.parse(output);
+
+    expect(parsed.deviceDefs.STM32F103C8T6).toMatchObject({
+      component: "MCU",
+      package: "LQFP48",
+    });
+    expect(parsed.components.U1).toMatchObject({
+      device: "STM32F103C8T6",
+      component: "MCU",
+      package: "LQFP48",
+    });
+  });
+
   it("validates a vNext diff_pair file", () => {
     const output = runCli(["validate", "examples/dsl/vnext-diff-pair.opcb"]);
     const parsed = JSON.parse(output);

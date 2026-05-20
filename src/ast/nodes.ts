@@ -2,11 +2,17 @@ export type PinKind = "in" | "out" | "inout" | "passive" | "power_in" | "power_o
 
 export interface ProgramAst {
   kind: "program";
+  imports: ImportAst[];
   components: ComponentDefAst[];
   packages: PackageDefAst[];
   devices: DeviceDefAst[];
   instances: InstanceAst[];
   diffPairs: DiffPairAst[];
+}
+
+export interface ImportAst {
+  kind: "import";
+  path: string;
 }
 
 export interface ComponentDefAst {

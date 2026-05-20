@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 
-import { readFileSync } from "node:fs";
 import { validateCircuitIr } from "./ir/validate";
-import { compileOpenPcbDsl, parseOpenPcbDsl } from "./parser";
+import { compileOpenPcbDslFile, parseOpenPcbDslFile } from "./parser";
 
 type CommandName = "parse" | "compile" | "validate";
 
@@ -20,8 +19,7 @@ Options:
 function main(argv: string[]): number {
   try {
     const { command, filePath, pretty } = parseArgs(argv);
-    const source = readFileSync(filePath, "utf8");
-    const result = runCommand(command, source);
+    const result = runCommand(command, filePath);
     process.stdout.write(`${JSON.stringify(result, null, pretty ? 2 : 0)}\n`);
     return 0;
   } catch (error) {
@@ -65,14 +63,14 @@ function isCommand(value: string): value is CommandName {
   return value === "parse" || value === "compile" || value === "validate";
 }
 
-function runCommand(command: CommandName, source: string): unknown {
+function runCommand(command: CommandName, filePath: string): unknown {
   switch (command) {
     case "parse":
-      return parseOpenPcbDsl(source);
+      return parseOpenPcbDslFile(filePath);
     case "compile":
-      return compileOpenPcbDsl(source);
+      return compileOpenPcbDslFile(filePath);
     case "validate":
-      return validateCircuitIr(compileOpenPcbDsl(source));
+      return validateCircuitIr(compileOpenPcbDslFile(filePath));
     default: {
       const exhaustiveCheck: never = command;
       throw new Error(`Unsupported command: ${String(exhaustiveCheck)}`);
