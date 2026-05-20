@@ -28,7 +28,7 @@ U1 MCU(
 );
 ```
 
-在当前已实现语法里，元件实例使用空格分隔 `ref` 和 `type`，例如 `U1 MCU(...)`、`R1 Resistor(...)`，不使用 `:`。
+在当前已实现语法里，元件实例使用空格分隔 `ref` 和 `type`，例如 `U1 MCU(...)`、`R1 Resistor(...)`，不使用 `:`。vNext 如果继续保留内联辅助元件语法糖，也应遵循同一规则。
 
 ### Parser 支持范围
 
@@ -202,8 +202,8 @@ DecoupleOp         ::= "Decouple" "(" InlineInstance "," "to" "=" Identifier ")"
 TapOp              ::= "Tap" "(" InlineInstance ")"
 BridgeOp           ::= "Bridge" "(" InlineInstance "," "to" "=" Identifier ")"
 
-InlineInstance     ::= Identifier ":" Identifier
-                     | Identifier ":" InlineDeviceExpr
+InlineInstance     ::= Identifier Identifier
+                     | Identifier InlineDeviceExpr
 
 InlineDeviceExpr   ::= Identifier "(" NamedArgList? ")"
 
@@ -273,7 +273,7 @@ device STM32F103C8T6 : MCU @ LQFP48 {
 
 inst U1 STM32F103C8T6 {
   NRST.Node(RESET)
-    .PullUp(R1: Resistor(value=10k, package=R_0402), to=3V3)
+    .PullUp(R1 Resistor(value=10k, package=R_0402), to=3V3)
 
   PA0.Node(ADC_IN)
 }
@@ -294,7 +294,7 @@ diff_pair ADC_D0 {
   n: U_ADC.DOUT0_N -> node ADC_D0_N -> U_FPGA.ADC_D0_N
 
   endpoint rx near U_FPGA {
-    bridge RT0: Resistor(value=100R, package=R_0402) between p, n
+    bridge RT0 Resistor(value=100R, package=R_0402) between p, n
   }
 
   constraint {
@@ -314,6 +314,7 @@ diff_pair ADC_D0 {
 - 当前 `U1 MCU(...)` 仍然是已实现、可用的写法
 - vNext 推荐改为 `inst U1 SomeDevice { ... }`
 - 当前内联辅助元件 `R1 Resistor(value=10k)` 的表达方式，在 vNext 中可继续保留为语法糖
+- 无论是顶层 `inst` 还是内联辅助元件实例化，`ref` 与 `type/device` 都建议统一使用空格分隔，不再使用 `:`
 - 该语法糖在语义上应被归一到某个 `device`，而不是长期停留在“实例时临时拼装器件”的层面
 
 建议的迁移方向：
