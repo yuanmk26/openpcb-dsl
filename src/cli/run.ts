@@ -1,11 +1,9 @@
-#!/usr/bin/env node
+import { validateCircuitIr } from "../ir/validate";
+import { compileOpenPcbDslFile, parseOpenPcbDslFile } from "../parser";
 
-import { validateCircuitIr } from "./ir/validate";
-import { compileOpenPcbDslFile, parseOpenPcbDslFile } from "./parser";
+export type CommandName = "parse" | "compile" | "validate";
 
-type CommandName = "parse" | "compile" | "validate";
-
-const USAGE = `openpcb-dsl <command> <file> [--pretty]
+export const USAGE = `openpcb-dsl <command> <file> [--pretty]
 
 Commands:
   parse      解析 .opcb 文件并输出 AST JSON
@@ -16,7 +14,7 @@ Options:
   --pretty   使用格式化 JSON 输出
 `;
 
-function main(argv: string[]): number {
+export function main(argv: string[]): number {
   try {
     const { command, filePath, pretty } = parseArgs(argv);
     const result = runCommand(command, filePath);
@@ -29,7 +27,7 @@ function main(argv: string[]): number {
   }
 }
 
-function parseArgs(argv: string[]): { command: CommandName; filePath: string; pretty: boolean } {
+export function parseArgs(argv: string[]): { command: CommandName; filePath: string; pretty: boolean } {
   if (argv.length === 0) {
     throw new Error(USAGE);
   }
@@ -59,11 +57,7 @@ function parseArgs(argv: string[]): { command: CommandName; filePath: string; pr
   };
 }
 
-function isCommand(value: string): value is CommandName {
-  return value === "parse" || value === "compile" || value === "validate";
-}
-
-function runCommand(command: CommandName, filePath: string): unknown {
+export function runCommand(command: CommandName, filePath: string): unknown {
   switch (command) {
     case "parse":
       return parseOpenPcbDslFile(filePath);
@@ -78,4 +72,6 @@ function runCommand(command: CommandName, filePath: string): unknown {
   }
 }
 
-process.exitCode = main(process.argv.slice(2));
+function isCommand(value: string): value is CommandName {
+  return value === "parse" || value === "compile" || value === "validate";
+}

@@ -4,7 +4,7 @@ import { join, resolve } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
 
 const workspaceRoot = resolve(import.meta.dirname, "..");
-const cliPath = join(workspaceRoot, "dist", "cli.js");
+const cliPath = join(workspaceRoot, "dist", "cli", "index.js");
 
 function runCli(args: string[]): string {
   return execFileSync(process.execPath, [cliPath, ...args], {
