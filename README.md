@@ -179,6 +179,7 @@ examples/
 ## 当前限制
 
 - `CircuitIR` 已保留定义层字段，但当前到 tscircuit JSON 的映射仍处于早期阶段
+- 当前 schematic 导出的主要问题不在线网是否导出，而在于还缺少正式的 `component/device -> symbolKind` 映射，因此复杂器件常退化为通用方框符号
 - 内联辅助元件仍按 ad-hoc 方式直接降级为普通元件实例，不强制先进入 `deviceDefs`
 - `endpoint ... near ...` 当前只进入 AST / IR 并校验 ref 是否存在，不额外做几何或布局语义处理
 - 字符串 API `parseOpenPcbDsl(source)` / `compileOpenPcbDsl(source)` 不负责解析文件路径，也不会展开 `import`
