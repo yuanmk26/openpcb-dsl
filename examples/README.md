@@ -6,6 +6,7 @@
 - `dsl/imports/`：多文件定义层导入样例
 - `ast/`：AST 快照
 - `ir/`：IR 快照
+- `schematic/`：SchematicIR 快照
 - `emitters/`：导出器输出样例
 
 当前新增的导入示例：
@@ -14,6 +15,7 @@
 - `examples/dsl/imports/vnext-device-board.opcb`
 - `examples/ast/vnext-device-imports.ast.json`
 - `examples/ir/vnext-device-imports.ir.json`
+- `examples/schematic/simple-pin-ops.schematic.json`
 
 说明：
 
