@@ -40,5 +40,13 @@
     "tsup": "^8.2.4",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "@tscircuit/alphabet": "^0.0.25",
+    "@tscircuit/circuit-json-util": "^0.0.94",
+    "circuit-json": "^0.0.426",
+    "circuit-json-to-connectivity-map": "^0.0.23",
+    "circuit-to-svg": "^0.0.347",
+    "schematic-symbols": "^0.0.224"
   }
 }

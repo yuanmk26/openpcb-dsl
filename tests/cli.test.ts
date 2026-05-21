@@ -1,5 +1,6 @@
 import { execFileSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
 
@@ -70,6 +71,61 @@ describe("openpcb-dsl cli", () => {
     expect(Array.isArray(parsed)).toBe(true);
   });
 
+  it("emits schematic circuit json to stdout", () => {
+    const output = runCli(["emit-schematic-json", "examples/dsl/simple-pin-ops.opcb", "--pretty"]);
+    const parsed = JSON.parse(output);
+
+    expect(parsed).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: "schematic_component" }),
+        expect.objectContaining({ type: "schematic_trace" }),
+        expect.objectContaining({ type: "schematic_net_label" }),
+      ]),
+    );
+  });
+
+  it("emits schematic svg to stdout", () => {
+    const output = runCli(["emit-schematic-svg", "examples/dsl/simple-pin-ops.opcb"]);
+
+    expect(output).toContain("<svg");
+    expect(output).toContain("</svg>");
+  });
+
+  it("writes schematic circuit json to the requested output file", () => {
+    const root = mkdtempSync(join(tmpdir(), "openpcb-dsl-cli-"));
+    const outFile = join(root, "simple-pin-ops.schematic.circuit.json");
+
+    const stdout = runCli([
+      "emit-schematic-json",
+      "examples/dsl/simple-pin-ops.opcb",
+      "--pretty",
+      "--out",
+      outFile,
+    ]);
+
+    expect(stdout).toBe("");
+    expect(JSON.parse(readFileSync(outFile, "utf8"))).toEqual(
+      expect.arrayContaining([expect.objectContaining({ type: "schematic_component" })]),
+    );
+  });
+
+  it("writes schematic svg to the requested output file", () => {
+    const root = mkdtempSync(join(tmpdir(), "openpcb-dsl-cli-"));
+    const outFile = join(root, "simple-pin-ops.schematic.svg");
+
+    const stdout = runCli([
+      "emit-schematic-svg",
+      "examples/dsl/simple-pin-ops.opcb",
+      "--out",
+      outFile,
+    ]);
+
+    expect(stdout).toBe("");
+    const svg = readFileSync(outFile, "utf8");
+    expect(svg).toContain("<svg");
+    expect(svg).toContain("</svg>");
+  });
+
   it("supports pretty JSON output", () => {
     const output = runCli(["parse", "examples/dsl/mcu-reset.opcb", "--pretty"]);
 
@@ -79,7 +135,7 @@ describe("openpcb-dsl cli", () => {
   it("fails when no command is provided", () => {
     const errorOutput = runCliExpectError([]);
 
-    expect(errorOutput).toContain("openpcb-dsl <command> <file> [--pretty]");
+    expect(errorOutput).toContain("openpcb-dsl <command> <file> [--pretty] [--out <file>]");
   });
 
   it("fails when the file path is missing", () => {
@@ -98,6 +154,12 @@ describe("openpcb-dsl cli", () => {
     const errorOutput = runCliExpectError(["parse", "examples/dsl/missing.opcb"]);
 
     expect(errorOutput).toContain("ENOENT");
+  });
+
+  it("fails when --out does not include a path", () => {
+    const errorOutput = runCliExpectError(["emit-schematic-json", "examples/dsl/simple-pin-ops.opcb", "--out"]);
+
+    expect(errorOutput).toContain("缺少 --out 的输出文件路径");
   });
 
   it("surfaces parser errors from unsupported diff_pair input", () => {
