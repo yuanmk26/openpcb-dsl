@@ -188,6 +188,7 @@ examples/
 - [语法设计](docs/syntax.md)
 - [AST 设计](docs/ast.md)
 - [IR 设计](docs/ir.md)
+- [SchematicIR 设计](docs/schematic-ir.md)
 - [CLI 使用说明](docs/cli.md)
 - [架构说明](docs/architecture.md)
 - [tscircuit 映射](docs/tscircuit-mapping.md)
