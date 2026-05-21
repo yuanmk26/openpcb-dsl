@@ -4,7 +4,7 @@
 
 当前编译链路：
 
-`OpenPCB DSL -> ProgramAst -> CircuitIR -> emitter / validator`
+`OpenPCB DSL -> ProgramAst -> CircuitIR -> tscircuit JSON emitter / validator`
 
 ## 当前能力
 
@@ -178,7 +178,7 @@ examples/
 
 ## 当前限制
 
-- `CircuitIR` 已保留定义层字段，但 emitter 仍主要围绕 netlist / pattern 工作
+- `CircuitIR` 已保留定义层字段，但当前到 tscircuit JSON 的映射仍处于早期阶段
 - 内联辅助元件仍按 ad-hoc 方式直接降级为普通元件实例，不强制先进入 `deviceDefs`
 - `endpoint ... near ...` 当前只进入 AST / IR 并校验 ref 是否存在，不额外做几何或布局语义处理
 - 字符串 API `parseOpenPcbDsl(source)` / `compileOpenPcbDsl(source)` 不负责解析文件路径，也不会展开 `import`

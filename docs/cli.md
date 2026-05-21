@@ -18,7 +18,7 @@
 
 - 调试 parser
 - 查看 `import/component/package/device/inst/diff_pair` 是否按预期进入 AST
-- 查看多文件定义层导入展开后的总 AST
+- 查看多文件定义层导入展开后的整体 AST
 
 ```bash
 openpcb-dsl parse examples/dsl/imports/vnext-device-board.opcb --pretty
@@ -28,7 +28,7 @@ openpcb-dsl parse examples/dsl/imports/vnext-device-board.opcb --pretty
 
 读取 `.opcb` 入口文件并输出 `CircuitIR` JSON。
 
-这是更接近实际集成的主命令。
+这是当前最接近实际集成边界的主命令。
 
 ```bash
 openpcb-dsl compile examples/dsl/vnext-diff-pair.opcb --pretty
@@ -70,4 +70,4 @@ CLI 现在以入口文件为单位工作：
 - CLI 仍然是调试工具，不提供交互模式
 - 还不支持 `stdin`
 - 还不支持 `--out`
-- emitter 子命令还没有接到 CLI
+- tscircuit JSON emitter 子命令还没有接到 CLI
