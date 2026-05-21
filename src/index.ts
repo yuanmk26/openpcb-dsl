@@ -9,3 +9,4 @@ export * from "./parser/load";
 export * from "./schematic";
 export * from "./emitters/tscircuit/emit-tsx";
 export * from "./emitters/tscircuit/emit-circuit-json";
+export * from "./emitters/tscircuit/emit-schematic-circuit-json";
