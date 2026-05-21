@@ -1,10 +1,10 @@
 # openpcb-dsl
 
-`openpcb-dsl` 是 OpenPCB 项目的 TypeScript 编译核心，负责把 `.opcb` 文本 DSL 解析为 `ProgramAst`，再进一步 lowering 为 `CircuitIR`，供校验器、导出器和上层工具使用。
+`openpcb-dsl` 是 OpenPCB 项目的 TypeScript 编译核心，负责把 `.opcb` 文本 DSL 解析为 `ProgramAst`，再进一步 lowering 为 `CircuitIR` 与 `SchematicIR`，供校验器、导出器和上层工具使用。
 
 当前编译链路：
 
-`OpenPCB DSL -> ProgramAst -> CircuitIR -> tscircuit JSON emitter / validator`
+`OpenPCB DSL -> ProgramAst -> CircuitIR -> SchematicIR -> tscircuit schematic Circuit JSON / SVG / validator`
 
 ## 当前能力
 
@@ -22,7 +22,10 @@
 - 差分约束
 - legacy 内联辅助元件语法糖，例如 `R1 Resistor(value=10k)`
 - AST -> IR lowering
+- `CircuitIR -> SchematicIR` lowering
 - IR 校验 diagnostics
+- tscircuit schematic Circuit JSON 导出
+- schematic SVG 导出
 - 基础 CLI
 - 多文件定义层导入：`import "./defs.opcb"`
 
@@ -145,7 +148,10 @@ inst U1 MCU_DEV {
 - `openpcb-dsl parse <file>`
 - `openpcb-dsl compile <file>`
 - `openpcb-dsl validate <file>`
+- `openpcb-dsl emit-schematic-json <file>`
+- `openpcb-dsl emit-schematic-svg <file>`
 - `--pretty`
+- `--out <file>`
 
 示例：
 
@@ -153,9 +159,11 @@ inst U1 MCU_DEV {
 openpcb-dsl parse examples/dsl/vnext-device.opcb --pretty
 openpcb-dsl compile examples/dsl/imports/vnext-device-board.opcb --pretty
 openpcb-dsl validate examples/dsl/vnext-diff-pair.opcb --pretty
+openpcb-dsl emit-schematic-json examples/dsl/simple-pin-ops.opcb --pretty --out examples/emitters/circuit-json/simple-pin-ops.schematic.circuit.json
+openpcb-dsl emit-schematic-svg examples/dsl/simple-pin-ops.opcb --out examples/emitters/svg/simple-pin-ops.schematic.svg
 ```
 
-CLI 以入口文件为单位工作，会递归展开 `import` 后再输出 AST / IR / diagnostics。
+CLI 以入口文件为单位工作，会递归展开 `import` 后再输出 AST / IR / diagnostics / schematic 导出结果。
 
 ## 示例目录
 
@@ -169,12 +177,22 @@ examples/
     *.ast.json
   ir/
     *.ir.json
+  schematic/
+    *.schematic.json
+  emitters/
+    circuit-json/
+      *.json
+    svg/
+      *.svg
 ```
 
 - `examples/dsl/`：DSL 输入
 - `examples/dsl/imports/`：多文件定义层导入示例
 - `examples/ast/`：AST 快照
 - `examples/ir/`：IR 快照
+- `examples/schematic/`：SchematicIR 快照
+- `examples/emitters/circuit-json/`：tscircuit schematic Circuit JSON 快照
+- `examples/emitters/svg/`：schematic SVG 快照
 
 ## 当前限制
 
