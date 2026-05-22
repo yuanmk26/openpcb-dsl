@@ -15,4 +15,12 @@ describe("lowerCircuitIrToSchematic", () => {
 
     expect(schematic).toEqual(expected);
   });
+
+  it("matches the connector header 1x4 schematic snapshot", () => {
+    const ir = compileOpenPcbDslFile("examples/dsl/connector-header-1x4.opcb");
+    const schematic = lowerCircuitIrToSchematic(ir, "connector-header-1x4");
+    const expected = JSON.parse(readFixture("examples/schematic/connector-header-1x4.schematic.json"));
+
+    expect(schematic).toEqual(expected);
+  });
 });

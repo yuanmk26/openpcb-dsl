@@ -18,4 +18,14 @@ describe("emitTscircuitSchematicCircuitJson", () => {
 
     expect(emitTscircuitSchematicCircuitJson(schematic)).toEqual(expected);
   });
+
+  it("matches the connector header 1x4 tscircuit schematic snapshot", () => {
+    const ir = compileOpenPcbDslFile("examples/dsl/connector-header-1x4.opcb");
+    const schematic = lowerCircuitIrToSchematic(ir, "connector-header-1x4");
+    const expected = JSON.parse(
+      readFixture("examples/emitters/circuit-json/connector-header-1x4.schematic.circuit.json"),
+    );
+
+    expect(emitTscircuitSchematicCircuitJson(schematic)).toEqual(expected);
+  });
 });

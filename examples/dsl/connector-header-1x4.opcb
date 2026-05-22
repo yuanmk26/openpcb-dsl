@@ -1,0 +1,28 @@
+component Header1x4 {
+  pins {
+    1: passive
+    2: passive
+    3: passive
+    4: passive
+  }
+}
+
+package PinHeader1x4 {
+  pads { 1..4 }
+}
+
+device CONNECTOR_HEADER_1X4 : Header1x4 @ PinHeader1x4 {
+  pinmap {
+    1 -> 1
+    2 -> 2
+    3 -> 3
+    4 -> 4
+  }
+}
+
+inst J1 CONNECTOR_HEADER_1X4 {
+  1.Node(VCC)
+  2.Node(IO0)
+  3.Node(IO1)
+  4.Node(GND)
+}

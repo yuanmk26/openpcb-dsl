@@ -1,21 +1,24 @@
 import type {
   CircuitIR,
   ComponentIR,
-  NetIR,
   PinDefIR,
   ComponentDefIR,
+  NetIR,
 } from "../ir/circuit-ir";
 import {
   createSchematicDocument,
   createSchematicSheet,
   type Point,
-  type SchematicDocument,
   type SchematicPinAnchor,
   type SchematicPinDirection,
   type SchematicPinSide,
+  type SchematicDocument,
   type SchematicSheet,
   type SchematicSymbolInstance,
+  type SymbolPinSpec,
+  type SymbolSpec,
 } from "./types";
+import { inferSymbolKind, resolveSymbolSpec } from "./symbol-resolver";
 
 interface SymbolPlacement {
   symbol: SchematicSymbolInstance;
@@ -53,7 +56,14 @@ function createSymbolPlacements(ir: CircuitIR): Record<string, SymbolPlacement> 
   refs.forEach((ref, index) => {
     const component = ir.components[ref];
     const pinNames = pinNamesByRef[ref] ?? inferDefaultPinNames(component);
-    const anchors = createPinAnchors(component, pinNames, ir.componentDefs[component.component ?? component.type]);
+    const symbolKind = inferSymbolKind(component);
+    const symbolSpec = resolveSymbolSpec(symbolKind, component);
+    const anchors = createPinAnchors(
+      component,
+      pinNames,
+      symbolSpec,
+      ir.componentDefs[component.component ?? component.type],
+    );
     const position = {
       x: (index % 4) * SYMBOL_SPACING_X,
       y: Math.floor(index / 4) * SYMBOL_SPACING_Y,
@@ -63,7 +73,8 @@ function createSymbolPlacements(ir: CircuitIR): Record<string, SymbolPlacement> 
       kind: "symbol",
       id: `symbol:${ref}`,
       sourceRef: ref,
-      symbolKind: inferSymbolKind(component),
+      symbolKind,
+      symbolSpecId: symbolSpec.id,
       position,
       rotation: 0,
       pins: anchors,
@@ -181,10 +192,14 @@ function splitPinRef(pinRef: string): [string, string] {
 }
 
 function inferDefaultPinNames(component: ComponentIR): string[] {
-  const normalizedType = component.type.toLowerCase();
-  if (normalizedType === "resistor" || normalizedType === "capacitor") {
+  const symbolKind = inferSymbolKind(component);
+  if (symbolKind === "passive_resistor" || symbolKind === "passive_capacitor") {
     return ["1", "2"];
   }
+  if (symbolKind === "connector_header_1x4") {
+    return ["1", "2", "3", "4"];
+  }
+  const normalizedType = component.type.toLowerCase();
   if (normalizedType === "testpoint" || normalizedType === "test_point") {
     return ["1"];
   }
@@ -194,18 +209,12 @@ function inferDefaultPinNames(component: ComponentIR): string[] {
 function createPinAnchors(
   component: ComponentIR,
   pinNames: string[],
+  symbolSpec: SymbolSpec,
   componentDef?: ComponentDefIR,
 ): SchematicPinAnchor[] {
-  const normalizedType = component.type.toLowerCase();
-  if (normalizedType === "resistor" || normalizedType === "capacitor") {
-    return pinNames.slice(0, 2).map((name, index) => ({
-      id: `pin:${component.ref}:${name}`,
-      name,
-      direction: "passive",
-      side: index === 0 ? "left" : "right",
-      offset: { x: index === 0 ? -PASSIVE_PIN_OFFSET : PASSIVE_PIN_OFFSET, y: 0 },
-      electricalType: "passive",
-    }));
+  const anchorsFromSpec = createPinAnchorsFromSpec(component.ref, pinNames, symbolSpec);
+  if (anchorsFromSpec) {
+    return anchorsFromSpec;
   }
 
   if (pinNames.length === 1) {
@@ -244,6 +253,34 @@ function createPinAnchors(
   });
 }
 
+export function createPinAnchorsFromSpec(
+  ref: string,
+  pinNames: string[],
+  symbolSpec: SymbolSpec,
+): SchematicPinAnchor[] | undefined {
+  if (symbolSpec.pins.length === 0) {
+    return undefined;
+  }
+
+  const pinsByName = new Map(symbolSpec.pins.map((pin) => [pin.name, pin]));
+  if (!pinNames.every((pinName) => pinsByName.has(pinName))) {
+    return undefined;
+  }
+
+  return pinNames.map((pinName) => createAnchorFromSymbolPinSpec(ref, pinsByName.get(pinName)!));
+}
+
+function createAnchorFromSymbolPinSpec(ref: string, pin: SymbolPinSpec): SchematicPinAnchor {
+  return {
+    id: `pin:${ref}:${pin.name}`,
+    name: pin.name,
+    direction: pin.direction,
+    side: pin.side,
+    offset: pin.offset,
+    electricalType: pin.electricalType,
+  };
+}
+
 function mapPinKindToDirection(pinDef?: PinDefIR): SchematicPinDirection | undefined {
   switch (pinDef?.kind) {
     case "in":
@@ -260,17 +297,6 @@ function mapPinKindToDirection(pinDef?: PinDefIR): SchematicPinDirection | undef
     default:
       return undefined;
   }
-}
-
-function inferSymbolKind(component: ComponentIR): string {
-  const normalizedType = component.type.toLowerCase();
-  if (normalizedType === "resistor" || normalizedType === "capacitor") {
-    return normalizedType;
-  }
-  if (component.device || component.component) {
-    return "generic_ic";
-  }
-  return "generic_component";
 }
 
 function createSymbolProperties(component: ComponentIR): Record<string, string> {

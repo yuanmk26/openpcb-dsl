@@ -10,7 +10,8 @@
           "kind": "symbol",
           "id": "symbol:C1",
           "sourceRef": "C1",
-          "symbolKind": "capacitor",
+          "symbolKind": "passive_capacitor",
+          "symbolSpecId": "passive_capacitor",
           "position": {
             "x": 0,
             "y": 0
@@ -56,6 +57,7 @@
           "id": "symbol:Inst_U1",
           "sourceRef": "Inst_U1",
           "symbolKind": "generic_component",
+          "symbolSpecId": "generic_component",
           "position": {
             "x": 80,
             "y": 0
@@ -95,7 +97,8 @@
           "kind": "symbol",
           "id": "symbol:R1",
           "sourceRef": "R1",
-          "symbolKind": "resistor",
+          "symbolKind": "passive_resistor",
+          "symbolSpecId": "passive_resistor",
           "position": {
             "x": 160,
             "y": 0
@@ -140,7 +143,8 @@
           "kind": "symbol",
           "id": "symbol:R2",
           "sourceRef": "R2",
-          "symbolKind": "resistor",
+          "symbolKind": "passive_resistor",
+          "symbolSpecId": "passive_resistor",
           "position": {
             "x": 240,
             "y": 0

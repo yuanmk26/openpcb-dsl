@@ -91,6 +91,13 @@ describe("openpcb-dsl cli", () => {
     expect(output).toContain("</svg>");
   });
 
+  it("emits the connector header example without missing-symbol placeholders", () => {
+    const output = runCli(["emit-schematic-svg", "examples/dsl/connector-header-1x4.opcb"]);
+
+    expect(output).toContain("<svg");
+    expect(output).not.toContain("Symbol not found");
+  });
+
   it("writes schematic circuit json to the requested output file", () => {
     const root = mkdtempSync(join(tmpdir(), "openpcb-dsl-cli-"));
     const outFile = join(root, "simple-pin-ops.schematic.circuit.json");

@@ -4,9 +4,12 @@ import type {
   SchematicNetLabel,
   SchematicOrientation,
   SchematicPinAnchor,
+  SymbolSpec,
   SchematicSymbolInstance,
+  TscircuitSymbolMapping,
   SchematicWire,
 } from "../../schematic";
+import { getSymbolSpecById, mapSymbolSpecToTscircuit } from "../../schematic";
 
 export interface TscircuitPoint {
   x: number;
@@ -257,26 +260,27 @@ function createSourceComponent(
   source_component_id: string,
 ): [TscircuitSourceComponent] {
   const typeName = symbol.properties?.type ?? symbol.symbolKind;
+  const mapping = resolveTscircuitMapping(symbol);
 
-  if (symbol.symbolKind === "resistor") {
+  if (symbol.symbolKind === "passive_resistor") {
     return [
       {
         type: "source_component",
         source_component_id,
         name: symbol.sourceRef,
-        ftype: "simple_resistor",
+        ftype: mapping?.ftype ?? "simple_resistor",
         resistance: symbol.properties?.value,
       },
     ];
   }
 
-  if (symbol.symbolKind === "capacitor") {
+  if (symbol.symbolKind === "passive_capacitor") {
     return [
       {
         type: "source_component",
         source_component_id,
         name: symbol.sourceRef,
-        ftype: "simple_capacitor",
+        ftype: mapping?.ftype ?? "simple_capacitor",
         capacitance: symbol.properties?.value,
       },
     ];
@@ -288,7 +292,7 @@ function createSourceComponent(
         type: "source_component",
         source_component_id,
         name: symbol.sourceRef,
-        ftype: "simple_test_point",
+        ftype: mapping?.ftype ?? "simple_test_point",
       },
     ];
   }
@@ -298,7 +302,7 @@ function createSourceComponent(
       type: "source_component",
       source_component_id,
       name: symbol.sourceRef,
-      ftype: "simple_chip",
+      ftype: mapping?.ftype ?? "simple_chip",
     },
   ];
 }
@@ -409,21 +413,31 @@ function collectPortIdsForWire(wire: SchematicWire, context: EmitterContext): st
 }
 
 function inferSymbolName(symbol: SchematicSymbolInstance): string {
+  const mapping = resolveTscircuitMapping(symbol);
+  if (mapping?.symbolName) {
+    return mapping.symbolName;
+  }
+
   switch (symbol.symbolKind) {
-    case "resistor":
+    case "passive_resistor":
       return "boxresistor_right";
-    case "capacitor":
+    case "passive_capacitor":
       return "capacitor_right";
     default:
-      return "box";
+      return "boxresistor_right";
   }
 }
 
 function inferSymbolSize(symbol: SchematicSymbolInstance): { width: number; height: number } {
+  const mapping = resolveTscircuitMapping(symbol);
+  if (mapping?.size) {
+    return mapping.size;
+  }
+
   switch (symbol.symbolKind) {
-    case "resistor":
+    case "passive_resistor":
       return { width: 1.05, height: 0.4 };
-    case "capacitor":
+    case "passive_capacitor":
       return { width: 1.05, height: 0.84 };
     default:
       return {
@@ -431,6 +445,19 @@ function inferSymbolSize(symbol: SchematicSymbolInstance): { width: number; heig
         height: Math.max(0.8, symbol.pins.length * 0.28),
       };
   }
+}
+
+function resolveTscircuitMapping(symbol: SchematicSymbolInstance): TscircuitSymbolMapping | undefined {
+  const symbolSpec = resolveSymbolSpec(symbol);
+  return symbolSpec ? mapSymbolSpecToTscircuit(symbolSpec) : undefined;
+}
+
+function resolveSymbolSpec(symbol: SchematicSymbolInstance): SymbolSpec | undefined {
+  if (!symbol.symbolSpecId) {
+    return undefined;
+  }
+
+  return getSymbolSpecById(symbol.symbolSpecId);
 }
 
 function inferPinNumber(pin: SchematicPinAnchor, index: number): number | undefined {
