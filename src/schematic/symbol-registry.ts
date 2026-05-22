@@ -124,12 +124,7 @@ const SYMBOL_SPEC_REGISTRY: Record<string, SymbolSpec> = {
     },
     backendMappings: {
       tscircuit: {
-        symbolName: "crystal_4pin_right",
-        ftype: "simple_chip",
-        size: {
-          width: 1.3,
-          height: 1.1,
-        },
+        ftype: "simple_pin_header",
       },
     },
   },
@@ -155,12 +150,7 @@ const SYMBOL_SPEC_REGISTRY: Record<string, SymbolSpec> = {
     },
     backendMappings: {
       tscircuit: {
-        symbolName: "crystal_4pin_right",
-        ftype: "simple_chip",
-        size: {
-          width: 1.4,
-          height: 1.2,
-        },
+        ftype: "simple_pin_header",
       },
     },
   },
@@ -186,12 +176,7 @@ const SYMBOL_SPEC_REGISTRY: Record<string, SymbolSpec> = {
     },
     backendMappings: {
       tscircuit: {
-        symbolName: "crystal_4pin_right",
         ftype: "simple_chip",
-        size: {
-          width: 1.4,
-          height: 1.1,
-        },
       },
     },
   },
@@ -217,12 +202,7 @@ const SYMBOL_SPEC_REGISTRY: Record<string, SymbolSpec> = {
     },
     backendMappings: {
       tscircuit: {
-        symbolName: "boxresistor_right",
         ftype: "simple_chip",
-        size: {
-          width: 1.4,
-          height: 0.8,
-        },
       },
     },
   },

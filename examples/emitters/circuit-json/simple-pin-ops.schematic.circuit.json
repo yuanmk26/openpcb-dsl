@@ -45,6 +45,7 @@
     },
     "facing_direction": "left",
     "distance_from_component_edge": 0.4,
+    "side_of_component": "left",
     "pin_number": 1,
     "display_pin_label": "1",
     "is_connected": true
@@ -67,6 +68,7 @@
     },
     "facing_direction": "right",
     "distance_from_component_edge": 0.4,
+    "side_of_component": "right",
     "pin_number": 2,
     "display_pin_label": "2",
     "is_connected": true
@@ -86,11 +88,11 @@
       "y": 0
     },
     "size": {
-      "width": 1.4,
-      "height": 0.8
+      "width": 0.35,
+      "height": 0.3
     },
     "rotation": 0,
-    "symbol_name": "boxresistor_right"
+    "is_box_with_pins": true
   },
   {
     "type": "source_port",
@@ -110,6 +112,7 @@
     },
     "facing_direction": "left",
     "distance_from_component_edge": 0.4,
+    "side_of_component": "left",
     "pin_number": 1,
     "display_pin_label": "P1",
     "is_connected": true
@@ -132,9 +135,22 @@
     },
     "facing_direction": "right",
     "distance_from_component_edge": 0.4,
+    "side_of_component": "right",
     "pin_number": 2,
     "display_pin_label": "P2",
     "is_connected": true
+  },
+  {
+    "type": "schematic_text",
+    "schematic_text_id": "schematic_text:Inst_U1:ref",
+    "schematic_component_id": "schematic_component:Inst_U1",
+    "text": "Inst_U1",
+    "position": {
+      "x": 1,
+      "y": -0.225
+    },
+    "anchor": "bottom_center",
+    "rotation": 0
   },
   {
     "type": "source_component",
@@ -177,6 +193,7 @@
     },
     "facing_direction": "left",
     "distance_from_component_edge": 0.4,
+    "side_of_component": "left",
     "pin_number": 1,
     "display_pin_label": "1",
     "is_connected": true
@@ -199,6 +216,7 @@
     },
     "facing_direction": "right",
     "distance_from_component_edge": 0.4,
+    "side_of_component": "right",
     "pin_number": 2,
     "display_pin_label": "2",
     "is_connected": true
@@ -244,6 +262,7 @@
     },
     "facing_direction": "left",
     "distance_from_component_edge": 0.4,
+    "side_of_component": "left",
     "pin_number": 1,
     "display_pin_label": "1",
     "is_connected": true
@@ -266,6 +285,7 @@
     },
     "facing_direction": "right",
     "distance_from_component_edge": 0.4,
+    "side_of_component": "right",
     "pin_number": 2,
     "display_pin_label": "2",
     "is_connected": true

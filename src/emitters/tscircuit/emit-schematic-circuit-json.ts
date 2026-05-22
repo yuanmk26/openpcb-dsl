@@ -4,8 +4,8 @@ import type {
   SchematicNetLabel,
   SchematicOrientation,
   SchematicPinAnchor,
-  SymbolSpec,
   SchematicSymbolInstance,
+  SymbolSpec,
   TscircuitSymbolMapping,
   SchematicWire,
 } from "../../schematic";
@@ -29,6 +29,8 @@ export interface TscircuitSourceComponent {
   ftype?: string;
   resistance?: string;
   capacitance?: string;
+  pin_count?: number;
+  gender?: "male" | "female";
 }
 
 export interface TscircuitSourcePort {
@@ -62,8 +64,9 @@ export interface TscircuitSchematicComponent {
     height: number;
   };
   rotation?: number;
-  symbol_name: string;
+  symbol_name?: string;
   symbol_display_value?: string;
+  is_box_with_pins?: boolean;
 }
 
 export interface TscircuitSchematicPort {
@@ -74,9 +77,35 @@ export interface TscircuitSchematicPort {
   center: TscircuitPoint;
   facing_direction: "left" | "right" | "up" | "down";
   distance_from_component_edge: number;
+  side_of_component?: "left" | "right" | "top" | "bottom";
   pin_number?: number;
   display_pin_label?: string;
   is_connected: boolean;
+}
+
+export interface TscircuitSchematicText {
+  type: "schematic_text";
+  schematic_text_id: string;
+  schematic_component_id: string;
+  text: string;
+  font_size?: number;
+  position: TscircuitPoint;
+  rotation?: number;
+  anchor?:
+    | "center"
+    | "top_left"
+    | "top_right"
+    | "bottom_left"
+    | "bottom_right"
+    | "center_left"
+    | "center_right"
+    | "top_center"
+    | "bottom_center"
+    | "top"
+    | "bottom"
+    | "left"
+    | "right";
+  color?: string;
 }
 
 export interface TscircuitSchematicTrace {
@@ -108,6 +137,7 @@ export type TscircuitSchematicCircuitJsonElement =
   | TscircuitSourceTrace
   | TscircuitSchematicComponent
   | TscircuitSchematicPort
+  | TscircuitSchematicText
   | TscircuitSchematicTrace
   | TscircuitSchematicNetLabel;
 
@@ -197,16 +227,19 @@ function emitSymbolElements(
 ): TscircuitSchematicCircuitJsonElement[] {
   const source_component_id = context.componentIdsByRef[symbol.sourceRef];
   const schematic_component_id = schematicComponentId(symbol.sourceRef);
+  const symbolSpec = resolveSymbolSpec(symbol);
+  const renderAsRectBox = shouldRenderAsRectBox(symbolSpec);
   const [sourceComponent] = createSourceComponent(symbol, source_component_id);
   const schematicComponent: TscircuitSchematicComponent = {
     type: "schematic_component",
     schematic_component_id,
     source_component_id,
     center: scalePoint(symbol.position ?? { x: 0, y: 0 }),
-    size: inferSymbolSize(symbol),
+    size: inferSymbolSize(symbol, symbolSpec),
     rotation: symbol.rotation,
-    symbol_name: inferSymbolName(symbol),
+    symbol_name: renderAsRectBox ? undefined : inferSymbolName(symbol, symbolSpec),
     symbol_display_value: symbol.properties?.value,
+    ...(renderAsRectBox ? { is_box_with_pins: true } : {}),
   };
 
   const ports = symbol.pins.map((pin, index) => {
@@ -244,6 +277,7 @@ function emitSymbolElements(
       center,
       facing_direction: facingDirection,
       distance_from_component_edge: DISTANCE_FROM_COMPONENT_EDGE,
+      side_of_component: pin.side,
       pin_number: pinNumber,
       display_pin_label: pin.name,
       is_connected: false,
@@ -252,7 +286,9 @@ function emitSymbolElements(
     return [sourcePort, schematicPort];
   });
 
-  return [sourceComponent, schematicComponent, ...ports.flat()];
+  const texts = renderAsRectBox ? emitRectSymbolTexts(symbol, schematic_component_id, symbolSpec) : [];
+
+  return [sourceComponent, schematicComponent, ...ports.flat(), ...texts];
 }
 
 function createSourceComponent(
@@ -293,6 +329,19 @@ function createSourceComponent(
         source_component_id,
         name: symbol.sourceRef,
         ftype: mapping?.ftype ?? "simple_test_point",
+      },
+    ];
+  }
+
+  if (symbol.symbolKind === "connector_header_1x4") {
+    return [
+      {
+        type: "source_component",
+        source_component_id,
+        name: symbol.sourceRef,
+        ftype: mapping?.ftype ?? "simple_pin_header",
+        pin_count: 4,
+        gender: "male",
       },
     ];
   }
@@ -412,10 +461,14 @@ function collectPortIdsForWire(wire: SchematicWire, context: EmitterContext): st
   return [...ids];
 }
 
-function inferSymbolName(symbol: SchematicSymbolInstance): string {
+function inferSymbolName(symbol: SchematicSymbolInstance, symbolSpec?: SymbolSpec): string {
   const mapping = resolveTscircuitMapping(symbol);
   if (mapping?.symbolName) {
     return mapping.symbolName;
+  }
+
+  if (symbolSpec?.body.shape === "rect") {
+    return "boxresistor_right";
   }
 
   switch (symbol.symbolKind) {
@@ -428,10 +481,20 @@ function inferSymbolName(symbol: SchematicSymbolInstance): string {
   }
 }
 
-function inferSymbolSize(symbol: SchematicSymbolInstance): { width: number; height: number } {
+function inferSymbolSize(
+  symbol: SchematicSymbolInstance,
+  symbolSpec?: SymbolSpec,
+): { width: number; height: number } {
   const mapping = resolveTscircuitMapping(symbol);
   if (mapping?.size) {
     return mapping.size;
+  }
+
+  if (symbolSpec?.body) {
+    return {
+      width: round(symbolSpec.body.width * SCHEMATIC_SCALE),
+      height: round(symbolSpec.body.height * SCHEMATIC_SCALE),
+    };
   }
 
   switch (symbol.symbolKind) {
@@ -458,6 +521,79 @@ function resolveSymbolSpec(symbol: SchematicSymbolInstance): SymbolSpec | undefi
   }
 
   return getSymbolSpecById(symbol.symbolSpecId);
+}
+
+function shouldRenderAsRectBox(symbolSpec?: SymbolSpec): boolean {
+  return symbolSpec?.body.shape === "rect";
+}
+
+function emitRectSymbolTexts(
+  symbol: SchematicSymbolInstance,
+  schematic_component_id: string,
+  symbolSpec?: SymbolSpec,
+): TscircuitSchematicText[] {
+  if (!symbolSpec?.labels || !symbol.position) {
+    return [];
+  }
+
+  const texts: TscircuitSchematicText[] = [];
+  const refPlacement = symbolSpec.labels.ref;
+  if (refPlacement) {
+    texts.push({
+      type: "schematic_text",
+      schematic_text_id: `schematic_text:${symbol.sourceRef}:ref`,
+      schematic_component_id,
+      text: symbol.sourceRef,
+      position: scalePoint(addPoints(symbol.position, refPlacement.offset)),
+      anchor: mapTextAnchor(refPlacement.anchor, refPlacement.offset.y),
+      rotation: 0,
+    });
+  }
+
+  const valuePlacement = symbolSpec.labels.value;
+  const valueText = symbol.properties?.value;
+  if (valuePlacement && valueText) {
+    texts.push({
+      type: "schematic_text",
+      schematic_text_id: `schematic_text:${symbol.sourceRef}:value`,
+      schematic_component_id,
+      text: valueText,
+      position: scalePoint(addPoints(symbol.position, valuePlacement.offset)),
+      anchor: mapTextAnchor(valuePlacement.anchor, valuePlacement.offset.y),
+      rotation: 0,
+    });
+  }
+
+  return texts;
+}
+
+function mapTextAnchor(
+  anchor: "left" | "center" | "right" | undefined,
+  offsetY: number,
+): TscircuitSchematicText["anchor"] {
+  const vertical = offsetY < 0 ? "bottom" : offsetY > 0 ? "top" : "middle";
+
+  if (anchor === "left") {
+    return vertical === "bottom"
+      ? "bottom_left"
+      : vertical === "top"
+        ? "top_left"
+        : "center_left";
+  }
+
+  if (anchor === "right") {
+    return vertical === "bottom"
+      ? "bottom_right"
+      : vertical === "top"
+        ? "top_right"
+        : "center_right";
+  }
+
+  return vertical === "bottom"
+    ? "bottom_center"
+    : vertical === "top"
+      ? "top_center"
+      : "center";
 }
 
 function inferPinNumber(pin: SchematicPinAnchor, index: number): number | undefined {

@@ -76,7 +76,7 @@ export interface SymbolPinSpec {
 }
 
 export interface TscircuitSymbolMapping {
-  symbolName: string;
+  symbolName?: string;
   ftype?: string;
   size?: {
     width: number;

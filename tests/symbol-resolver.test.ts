@@ -38,8 +38,7 @@ describe("symbol resolver", () => {
 
     expect(spec.id).toBe("connector_header_1x4");
     expect(spec.backendMappings?.tscircuit).toMatchObject({
-      symbolName: "crystal_4pin_right",
-      ftype: "simple_chip",
+      ftype: "simple_pin_header",
     });
   });
 
