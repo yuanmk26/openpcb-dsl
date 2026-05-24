@@ -249,6 +249,7 @@ function emitSymbolElements(
     const schematicPortId = makeSchematicPortId(symbol.sourceRef, pin.name);
     const pinNumber = inferPinNumber(pin, index);
     const facingDirection = inferFacingDirection(pin);
+    const distanceFromComponentEdge = inferDistanceFromComponentEdge(pin, symbolSpec);
 
     context.portInfoByPointKey[pointKey(originalCenter)] = {
       sourcePortId,
@@ -276,7 +277,7 @@ function emitSymbolElements(
       source_port_id: sourcePortId,
       center,
       facing_direction: facingDirection,
-      distance_from_component_edge: DISTANCE_FROM_COMPONENT_EDGE,
+      distance_from_component_edge: distanceFromComponentEdge,
       side_of_component: pin.side,
       pin_number: pinNumber,
       display_pin_label: pin.name,
@@ -616,6 +617,36 @@ function inferFacingDirection(pin: SchematicPinAnchor): "left" | "right" | "up" 
     default:
       return "right";
   }
+}
+
+function inferDistanceFromComponentEdge(
+  pin: SchematicPinAnchor,
+  symbolSpec?: SymbolSpec,
+): number {
+  if (!pin.side || !pin.offset || symbolSpec?.body.shape !== "rect") {
+    return DISTANCE_FROM_COMPONENT_EDGE;
+  }
+
+  const halfWidth = symbolSpec.body.width / 2;
+  const halfHeight = symbolSpec.body.height / 2;
+  let outsideDistance = 0;
+
+  switch (pin.side) {
+    case "left":
+      outsideDistance = -pin.offset.x - halfWidth;
+      break;
+    case "right":
+      outsideDistance = pin.offset.x - halfWidth;
+      break;
+    case "top":
+      outsideDistance = -pin.offset.y - halfHeight;
+      break;
+    case "bottom":
+      outsideDistance = pin.offset.y - halfHeight;
+      break;
+  }
+
+  return round(Math.max(0, outsideDistance) * SCHEMATIC_SCALE);
 }
 
 function scalePoint(point: Point): TscircuitPoint {

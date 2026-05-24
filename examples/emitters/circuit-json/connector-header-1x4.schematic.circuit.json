@@ -44,7 +44,7 @@
       "y": -0.225
     },
     "facing_direction": "left",
-    "distance_from_component_edge": 0.4,
+    "distance_from_component_edge": 0,
     "side_of_component": "left",
     "pin_number": 1,
     "display_pin_label": "1",
@@ -67,7 +67,7 @@
       "y": -0.075
     },
     "facing_direction": "left",
-    "distance_from_component_edge": 0.4,
+    "distance_from_component_edge": 0,
     "side_of_component": "left",
     "pin_number": 2,
     "display_pin_label": "2",
@@ -90,7 +90,7 @@
       "y": 0.075
     },
     "facing_direction": "left",
-    "distance_from_component_edge": 0.4,
+    "distance_from_component_edge": 0,
     "side_of_component": "left",
     "pin_number": 3,
     "display_pin_label": "3",
@@ -113,7 +113,7 @@
       "y": 0.225
     },
     "facing_direction": "left",
-    "distance_from_component_edge": 0.4,
+    "distance_from_component_edge": 0,
     "side_of_component": "left",
     "pin_number": 4,
     "display_pin_label": "4",

@@ -111,7 +111,7 @@
       "y": 0
     },
     "facing_direction": "left",
-    "distance_from_component_edge": 0.4,
+    "distance_from_component_edge": 0.025,
     "side_of_component": "left",
     "pin_number": 1,
     "display_pin_label": "P1",
@@ -134,7 +134,7 @@
       "y": 0
     },
     "facing_direction": "right",
-    "distance_from_component_edge": 0.4,
+    "distance_from_component_edge": 0.025,
     "side_of_component": "right",
     "pin_number": 2,
     "display_pin_label": "P2",
