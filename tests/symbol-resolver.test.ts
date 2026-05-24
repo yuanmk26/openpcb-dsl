@@ -50,10 +50,10 @@ describe("symbol resolver", () => {
     const anchors = createPinAnchorsFromSpec("J1", ["1", "2", "3", "4"], spec);
 
     expect(anchors).toEqual([
-      expect.objectContaining({ name: "1", side: "left", offset: { x: -16, y: -18 } }),
-      expect.objectContaining({ name: "2", side: "left", offset: { x: -16, y: -6 } }),
-      expect.objectContaining({ name: "3", side: "left", offset: { x: -16, y: 6 } }),
-      expect.objectContaining({ name: "4", side: "left", offset: { x: -16, y: 18 } }),
+      expect.objectContaining({ name: "1", side: "left", offset: { x: -24, y: -18 } }),
+      expect.objectContaining({ name: "2", side: "left", offset: { x: -24, y: -6 } }),
+      expect.objectContaining({ name: "3", side: "left", offset: { x: -24, y: 6 } }),
+      expect.objectContaining({ name: "4", side: "left", offset: { x: -24, y: 18 } }),
     ]);
   });
 });

@@ -21,8 +21,8 @@
       "y": 0
     },
     "size": {
-      "width": 0.4,
-      "height": 0.6
+      "width": 0.5,
+      "height": 0.7
     },
     "rotation": 0,
     "is_box_with_pins": true
@@ -40,14 +40,13 @@
     "schematic_component_id": "schematic_component:J1",
     "source_port_id": "source_port:J1:1",
     "center": {
-      "x": -0.2,
+      "x": -0.3,
       "y": -0.225
     },
     "facing_direction": "left",
-    "distance_from_component_edge": 0,
+    "distance_from_component_edge": 0.05,
     "side_of_component": "left",
     "pin_number": 1,
-    "display_pin_label": "1",
     "is_connected": true
   },
   {
@@ -63,14 +62,13 @@
     "schematic_component_id": "schematic_component:J1",
     "source_port_id": "source_port:J1:2",
     "center": {
-      "x": -0.2,
+      "x": -0.3,
       "y": -0.075
     },
     "facing_direction": "left",
-    "distance_from_component_edge": 0,
+    "distance_from_component_edge": 0.05,
     "side_of_component": "left",
     "pin_number": 2,
-    "display_pin_label": "2",
     "is_connected": true
   },
   {
@@ -86,14 +84,13 @@
     "schematic_component_id": "schematic_component:J1",
     "source_port_id": "source_port:J1:3",
     "center": {
-      "x": -0.2,
+      "x": -0.3,
       "y": 0.075
     },
     "facing_direction": "left",
-    "distance_from_component_edge": 0,
+    "distance_from_component_edge": 0.05,
     "side_of_component": "left",
     "pin_number": 3,
-    "display_pin_label": "3",
     "is_connected": true
   },
   {
@@ -109,14 +106,13 @@
     "schematic_component_id": "schematic_component:J1",
     "source_port_id": "source_port:J1:4",
     "center": {
-      "x": -0.2,
+      "x": -0.3,
       "y": 0.225
     },
     "facing_direction": "left",
-    "distance_from_component_edge": 0,
+    "distance_from_component_edge": 0.05,
     "side_of_component": "left",
     "pin_number": 4,
-    "display_pin_label": "4",
     "is_connected": true
   },
   {
@@ -126,7 +122,7 @@
     "text": "J1",
     "position": {
       "x": 0,
-      "y": -0.35
+      "y": -0.4
     },
     "anchor": "bottom_center",
     "rotation": 0
@@ -168,11 +164,11 @@
     "edges": [
       {
         "from": {
-          "x": -0.2,
+          "x": -0.3,
           "y": 0.225
         },
         "to": {
-          "x": -0.075,
+          "x": -0.175,
           "y": 0.225
         }
       }
@@ -196,11 +192,11 @@
     "edges": [
       {
         "from": {
-          "x": -0.2,
+          "x": -0.3,
           "y": -0.075
         },
         "to": {
-          "x": -0.075,
+          "x": -0.175,
           "y": -0.075
         }
       }
@@ -224,11 +220,11 @@
     "edges": [
       {
         "from": {
-          "x": -0.2,
+          "x": -0.3,
           "y": 0.075
         },
         "to": {
-          "x": -0.075,
+          "x": -0.175,
           "y": 0.075
         }
       }
@@ -252,11 +248,11 @@
     "edges": [
       {
         "from": {
-          "x": -0.2,
+          "x": -0.3,
           "y": -0.225
         },
         "to": {
-          "x": -0.075,
+          "x": -0.175,
           "y": -0.225
         }
       }
@@ -269,11 +265,11 @@
     "source_net_id": "source_net:GND",
     "text": "GND",
     "anchor_position": {
-      "x": -0.075,
+      "x": -0.175,
       "y": 0.225
     },
     "center": {
-      "x": 0.045,
+      "x": -0.055,
       "y": 0.225
     },
     "anchor_side": "left"
@@ -284,11 +280,11 @@
     "source_net_id": "source_net:IO0",
     "text": "IO0",
     "anchor_position": {
-      "x": -0.075,
+      "x": -0.175,
       "y": -0.075
     },
     "center": {
-      "x": 0.045,
+      "x": -0.055,
       "y": -0.075
     },
     "anchor_side": "left"
@@ -299,11 +295,11 @@
     "source_net_id": "source_net:IO1",
     "text": "IO1",
     "anchor_position": {
-      "x": -0.075,
+      "x": -0.175,
       "y": 0.075
     },
     "center": {
-      "x": 0.045,
+      "x": -0.055,
       "y": 0.075
     },
     "anchor_side": "left"
@@ -314,11 +310,11 @@
     "source_net_id": "source_net:VCC",
     "text": "VCC",
     "anchor_position": {
-      "x": -0.075,
+      "x": -0.175,
       "y": -0.225
     },
     "center": {
-      "x": 0.045,
+      "x": -0.055,
       "y": -0.225
     },
     "anchor_side": "left"

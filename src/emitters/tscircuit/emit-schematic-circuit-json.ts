@@ -280,7 +280,7 @@ function emitSymbolElements(
       distance_from_component_edge: distanceFromComponentEdge,
       side_of_component: pin.side,
       pin_number: pinNumber,
-      display_pin_label: pin.name,
+      display_pin_label: shouldDisplayPinLabel(pin.name, pinNumber) ? pin.name : undefined,
       is_connected: false,
     };
 
@@ -603,6 +603,14 @@ function inferPinNumber(pin: SchematicPinAnchor, index: number): number | undefi
     return parsed;
   }
   return index + 1;
+}
+
+function shouldDisplayPinLabel(pinName: string, pinNumber?: number): boolean {
+  if (pinNumber === undefined) {
+    return true;
+  }
+
+  return pinName !== String(pinNumber);
 }
 
 function inferFacingDirection(pin: SchematicPinAnchor): "left" | "right" | "up" | "down" {

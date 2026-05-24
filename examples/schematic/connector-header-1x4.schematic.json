@@ -24,7 +24,7 @@
               "direction": "passive",
               "side": "left",
               "offset": {
-                "x": -16,
+                "x": -24,
                 "y": -18
               },
               "electricalType": "passive"
@@ -35,7 +35,7 @@
               "direction": "passive",
               "side": "left",
               "offset": {
-                "x": -16,
+                "x": -24,
                 "y": -6
               },
               "electricalType": "passive"
@@ -46,7 +46,7 @@
               "direction": "passive",
               "side": "left",
               "offset": {
-                "x": -16,
+                "x": -24,
                 "y": 6
               },
               "electricalType": "passive"
@@ -57,7 +57,7 @@
               "direction": "passive",
               "side": "left",
               "offset": {
-                "x": -16,
+                "x": -24,
                 "y": 18
               },
               "electricalType": "passive"
@@ -80,7 +80,7 @@
           "id": "net-label:GND",
           "netName": "GND",
           "position": {
-            "x": -6,
+            "x": -14,
             "y": 18
           },
           "orientation": "right"
@@ -90,7 +90,7 @@
           "id": "net-label:IO0",
           "netName": "IO0",
           "position": {
-            "x": -6,
+            "x": -14,
             "y": -6
           },
           "orientation": "right"
@@ -100,7 +100,7 @@
           "id": "net-label:IO1",
           "netName": "IO1",
           "position": {
-            "x": -6,
+            "x": -14,
             "y": 6
           },
           "orientation": "right"
@@ -110,7 +110,7 @@
           "id": "net-label:VCC",
           "netName": "VCC",
           "position": {
-            "x": -6,
+            "x": -14,
             "y": -18
           },
           "orientation": "right"

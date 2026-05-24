@@ -102,23 +102,23 @@ const SYMBOL_SPEC_REGISTRY: Record<string, SymbolSpec> = {
     kind: "connector_header_1x4",
     displayName: "排针 1x4",
     body: {
-      width: 32,
-      height: 48,
+      width: 40,
+      height: 56,
       shape: "rect",
     },
     pins: [
-      { name: "1", number: 1, side: "left", offset: { x: -16, y: -18 }, direction: "passive", electricalType: "passive" },
-      { name: "2", number: 2, side: "left", offset: { x: -16, y: -6 }, direction: "passive", electricalType: "passive" },
-      { name: "3", number: 3, side: "left", offset: { x: -16, y: 6 }, direction: "passive", electricalType: "passive" },
-      { name: "4", number: 4, side: "left", offset: { x: -16, y: 18 }, direction: "passive", electricalType: "passive" },
+      { name: "1", number: 1, side: "left", offset: { x: -24, y: -18 }, direction: "passive", electricalType: "passive" },
+      { name: "2", number: 2, side: "left", offset: { x: -24, y: -6 }, direction: "passive", electricalType: "passive" },
+      { name: "3", number: 3, side: "left", offset: { x: -24, y: 6 }, direction: "passive", electricalType: "passive" },
+      { name: "4", number: 4, side: "left", offset: { x: -24, y: 18 }, direction: "passive", electricalType: "passive" },
     ],
     labels: {
       ref: {
-        offset: { x: 0, y: -28 },
+        offset: { x: 0, y: -32 },
         anchor: "center",
       },
       value: {
-        offset: { x: 0, y: 28 },
+        offset: { x: 0, y: 32 },
         anchor: "center",
       },
     },
@@ -159,18 +159,18 @@ const SYMBOL_SPEC_REGISTRY: Record<string, SymbolSpec> = {
     kind: "generic_ic",
     displayName: "通用集成电路",
     body: {
-      width: 32,
-      height: 32,
+      width: 36,
+      height: 36,
       shape: "rect",
     },
     pins: [],
     labels: {
       ref: {
-        offset: { x: 0, y: -22 },
+        offset: { x: 0, y: -24 },
         anchor: "center",
       },
       value: {
-        offset: { x: 0, y: 22 },
+        offset: { x: 0, y: 24 },
         anchor: "center",
       },
     },
@@ -185,18 +185,18 @@ const SYMBOL_SPEC_REGISTRY: Record<string, SymbolSpec> = {
     kind: "generic_component",
     displayName: "通用元件",
     body: {
-      width: 28,
-      height: 24,
+      width: 32,
+      height: 28,
       shape: "rect",
     },
     pins: [],
     labels: {
       ref: {
-        offset: { x: 0, y: -18 },
+        offset: { x: 0, y: -20 },
         anchor: "center",
       },
       value: {
-        offset: { x: 0, y: 18 },
+        offset: { x: 0, y: 20 },
         anchor: "center",
       },
     },

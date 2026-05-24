@@ -29,7 +29,7 @@ const SYMBOL_SPACING_X = 80;
 const SYMBOL_SPACING_Y = 40;
 const PASSIVE_PIN_OFFSET = 12;
 const GENERIC_PIN_STEP_Y = 10;
-const GENERIC_PIN_OFFSET_X = 16;
+const GENERIC_PIN_OFFSET_X = 20;
 
 export function lowerCircuitIrToSchematic(ir: CircuitIR, title = "OpenPCB Schematic"): SchematicDocument {
   const document = createSchematicDocument("schematic-1", title);
