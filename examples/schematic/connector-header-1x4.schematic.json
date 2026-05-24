@@ -24,8 +24,8 @@
               "direction": "passive",
               "side": "left",
               "offset": {
-                "x": -24,
-                "y": -18
+                "x": -34,
+                "y": -24
               },
               "electricalType": "passive"
             },
@@ -35,8 +35,8 @@
               "direction": "passive",
               "side": "left",
               "offset": {
-                "x": -24,
-                "y": -6
+                "x": -34,
+                "y": -8
               },
               "electricalType": "passive"
             },
@@ -46,8 +46,8 @@
               "direction": "passive",
               "side": "left",
               "offset": {
-                "x": -24,
-                "y": 6
+                "x": -34,
+                "y": 8
               },
               "electricalType": "passive"
             },
@@ -57,8 +57,8 @@
               "direction": "passive",
               "side": "left",
               "offset": {
-                "x": -24,
-                "y": 18
+                "x": -34,
+                "y": 24
               },
               "electricalType": "passive"
             }
@@ -80,40 +80,40 @@
           "id": "net-label:GND",
           "netName": "GND",
           "position": {
-            "x": -14,
-            "y": 18
+            "x": -44,
+            "y": 24
           },
-          "orientation": "right"
+          "orientation": "left"
         },
         {
           "kind": "net_label",
           "id": "net-label:IO0",
           "netName": "IO0",
           "position": {
-            "x": -14,
-            "y": -6
+            "x": -44,
+            "y": -8
           },
-          "orientation": "right"
+          "orientation": "left"
         },
         {
           "kind": "net_label",
           "id": "net-label:IO1",
           "netName": "IO1",
           "position": {
-            "x": -14,
-            "y": 6
+            "x": -44,
+            "y": 8
           },
-          "orientation": "right"
+          "orientation": "left"
         },
         {
           "kind": "net_label",
           "id": "net-label:VCC",
           "netName": "VCC",
           "position": {
-            "x": -14,
-            "y": -18
+            "x": -44,
+            "y": -24
           },
-          "orientation": "right"
+          "orientation": "left"
         }
       ]
     }

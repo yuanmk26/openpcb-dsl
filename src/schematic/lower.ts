@@ -30,6 +30,7 @@ const SYMBOL_SPACING_Y = 40;
 const PASSIVE_PIN_OFFSET = 12;
 const GENERIC_PIN_STEP_Y = 10;
 const GENERIC_PIN_OFFSET_X = 20;
+const NET_LABEL_OFFSET = 10;
 
 export function lowerCircuitIrToSchematic(ir: CircuitIR, title = "OpenPCB Schematic"): SchematicDocument {
   const document = createSchematicDocument("schematic-1", title);
@@ -109,12 +110,13 @@ function appendNetGraphics(
     }
 
     if (anchorPoints.length === 1) {
+      const orientation = inferSinglePointNetOrientation(net.pins[0], placements);
       sheet.items.push({
         kind: "net_label",
         id: `net-label:${net.name}`,
         netName: net.name,
-        position: { x: anchorPoints[0].x + 10, y: anchorPoints[0].y },
-        orientation: "right",
+        position: offsetPoint(anchorPoints[0], orientation, NET_LABEL_OFFSET),
+        orientation,
       });
       continue;
     }
@@ -365,6 +367,39 @@ function midpoint(a: Point, b: Point): Point {
     x: Math.round((a.x + b.x) / 2),
     y: Math.round((a.y + b.y) / 2),
   };
+}
+
+function inferSinglePointNetOrientation(
+  pinRef: string,
+  placements: Record<string, SymbolPlacement>,
+): "left" | "right" | "up" | "down" {
+  const [ref, pin] = splitPinRef(pinRef);
+  const anchor = placements[ref]?.anchorsByName[pin];
+  switch (anchor?.side) {
+    case "left":
+      return "left";
+    case "right":
+      return "right";
+    case "top":
+      return "up";
+    case "bottom":
+      return "down";
+    default:
+      return "right";
+  }
+}
+
+function offsetPoint(point: Point, orientation: "left" | "right" | "up" | "down", distance: number): Point {
+  switch (orientation) {
+    case "left":
+      return { x: point.x - distance, y: point.y };
+    case "right":
+      return { x: point.x + distance, y: point.y };
+    case "up":
+      return { x: point.x, y: point.y - distance };
+    case "down":
+      return { x: point.x, y: point.y + distance };
+  }
 }
 
 function compareComponentRefs(a: string, b: string): number {
