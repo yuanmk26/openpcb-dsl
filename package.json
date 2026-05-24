@@ -21,7 +21,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "pnpm --dir ../openpcb-schematic-core build && pnpm --dir ../openpcb-schematic-symbols build && pnpm --dir ../openpcb-schematic-tscircuit build && tsup src/index.ts src/cli/index.ts --format esm --dts",
+    "build": "pnpm --dir ../openpcb-schematic-core build && pnpm --dir ../openpcb-schematic-symbols build && pnpm --dir ../openpcb-schematic-tscircuit build && pnpm --dir ../openpcb-schematic-svg build && tsup src/index.ts src/cli/index.ts --format esm --dts",
     "test": "vitest run",
     "dev": "vitest",
     "typecheck": "tsc --noEmit"
@@ -48,6 +48,7 @@
     "circuit-json-to-connectivity-map": "^0.0.23",
     "circuit-to-svg": "^0.0.347",
     "openpcb-schematic-core": "file:../openpcb-schematic-core",
+    "openpcb-schematic-svg": "file:../openpcb-schematic-svg",
     "openpcb-schematic-symbols": "file:../openpcb-schematic-symbols",
     "openpcb-schematic-tscircuit": "file:../openpcb-schematic-tscircuit",
     "schematic-symbols": "^0.0.224"
