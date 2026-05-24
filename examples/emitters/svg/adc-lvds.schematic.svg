@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" style="background-color: rgb(245, 241, 237)" data-real-to-screen-transform="matrix(418.3516943244,0,0,-418.3516943244,428.8104866825,300)" data-circuit-to-svg-version="0.0.346"><style>
+              .boundary { fill: rgb(245, 241, 237); }
+              .schematic-boundary { fill: none; stroke: #fff; }
+              .component { fill: none; stroke: rgb(132, 0, 0); }
+              .chip { fill: rgb(255, 255, 194); stroke: rgb(132, 0, 0); }
+              .component-pin { fill: none; stroke: rgb(132, 0, 0); }
+              /* Basic per-trace hover fallback */
+              .trace:hover {
+                filter: invert(1);
+              }
+              .trace:hover .trace-crossing-outline {
+                opacity: 0;
+              }
+              .trace:hover .trace-junction {
+                filter: invert(1);
+              }
+              /* Net-hover highlighting: when a trace or its overlays are hovered,
+                 invert color for all traces (base + overlays) sharing the same
+                 subcircuit connectivity key. Also hide crossing outline during hover. */
+              svg:has(:is(g.trace[data-subcircuit-connectivity-map-key="undefined"], g.trace-overlays[data-subcircuit-connectivity-map-key="undefined"]):hover) :is(g.trace[data-subcircuit-connectivity-map-key="undefined"], g.trace-overlays[data-subcircuit-connectivity-map-key="undefined"]) { filter: invert(1); }
+svg:has(:is(g.trace[data-subcircuit-connectivity-map-key="undefined"], g.trace-overlays[data-subcircuit-connectivity-map-key="undefined"]):hover) g.trace-overlays[data-subcircuit-connectivity-map-key="undefined"] .trace-crossing-outline { opacity: 0; }
+              .text { font-family: sans-serif; fill: rgb(0, 150, 0); }
+              .pin-number { fill: rgb(169, 0, 0); }
+              .port-label { fill: rgb(0, 100, 100); }
+              .component-name { fill: rgb(0, 100, 100); }
+            </style><rect class="boundary" x="0" y="0" width="1200" height="600"/><g class="trace" data-layer="base" data-circuit-json-type="schematic_trace" data-schematic-trace-id="schematic_trace:label:net-label:ADC_D0_N"><path d="M 491.56324083116004 300 L 543.85720262171 300" class="trace-invisible-hover-outline" stroke="rgb(0, 150, 0)" fill="none" stroke-width="66.936271091904px" stroke-linecap="round" opacity="0" stroke-linejoin="round"/><path d="M 491.56324083116004 300 L 543.85720262171 300" stroke="rgb(0, 150, 0)" fill="none" stroke-width="8.367033886488px" stroke-linecap="round" stroke-linejoin="round"/></g><g class="trace" data-layer="base" data-circuit-json-type="schematic_trace" data-schematic-trace-id="schematic_trace:label:net-label:ADC_D0_P"><path d="M 366.05773253384 300 L 418.35169432439005 300" class="trace-invisible-hover-outline" stroke="rgb(0, 150, 0)" fill="none" stroke-width="66.936271091904px" stroke-linecap="round" opacity="0" stroke-linejoin="round"/><path d="M 366.05773253384 300 L 418.35169432439005 300" stroke="rgb(0, 150, 0)" fill="none" stroke-width="8.367033886488px" stroke-linecap="round" stroke-linejoin="round"/></g><g class="trace-overlays" data-layer="overlay" data-circuit-json-type="schematic_trace" data-schematic-trace-id="schematic_trace:label:net-label:ADC_D0_N"/><g class="trace-overlays" data-layer="overlay" data-circuit-json-type="schematic_trace" data-schematic-trace-id="schematic_trace:label:net-label:ADC_D0_P"/><g data-circuit-json-type="schematic_component" data-schematic-component-id="schematic_component:RT0"><rect class="component-overlay" x="527.3132947097906" y="300.3803197221131" width="125.50550829731992" height="30.80589749116035" fill="transparent"/><path d="M 527.3132947097906 315.21278888452366 L 559.2601513672903 315.21278888452366" stroke="rgb(132, 0, 0)" fill="none" stroke-width="8.367033886488px" stroke-linecap="round"/><path d="M 619.7309871832717 315.21278888452366 L 652.8188030071105 315.21278888452366" stroke="rgb(132, 0, 0)" fill="none" stroke-width="8.367033886488px" stroke-linecap="round"/><path d="M 590.0660488584506 300.3803197221131 L 619.7309871832717 300.3803197221131 L 619.7309871832717 331.18621721327344 L 559.2601513672903 331.18621721327344 L 559.2601513672903 300.3803197221131 L 590.0660488584506 300.3803197221131" stroke="rgb(132, 0, 0)" fill="none" stroke-width="8.367033886488px" stroke-linecap="round"/><text x="587.7841305257721" y="294.7376662314115" stroke="rgb(245, 241, 237)" stroke-width="8.367033886488px" paint-order="stroke" fill="rgb(15, 15, 15)" font-family="sans-serif" text-anchor="middle" dominant-baseline="ideographic" font-size="75.30330497839199px">RT0</text><text x="587.7841305257721" y="339.1107890366536" fill="rgb(15, 15, 15)" font-family="sans-serif" text-anchor="middle" dominant-baseline="hanging" font-size="75.30330497839199px">100R</text></g><g class="schematic-port-hover" data-schematic-port-id="source_port:RT0:1"><circle cx="366.05773253384" cy="300" r="16.734067772976" fill="red" opacity="0"/></g><g class="schematic-port-hover" data-schematic-port-id="source_port:RT0:2"><circle cx="491.56324083116004" cy="300" r="16.734067772976" fill="red" opacity="0"/></g><path class="net-label" d="
+    M 543.85720262171,300
+    L 566.4481941152276,254.81801701296482
+    L 990.824152837899,254.81801701296482
+    L 990.824152837899,345.1819829870352
+    L 566.4481941152276,345.1819829870352
+    Z
+  " fill="rgba(255, 255, 255, 0.6)" stroke="rgb(132, 0, 0)" stroke-width="8.367033886488px"/><text class="net-label-text" x="581.508855110906" y="300" fill="rgb(132, 0, 0)" text-anchor="start" dominant-baseline="central" font-family="sans-serif" font-variant-numeric="tabular-nums" font-size="75.30330497839199px" transform="">ADC_D0_N</text><path class="net-label" d="
+    M 418.35169432439005,300
+    L 440.94268581790766,254.81801701296482
+    L 862.529633245083,254.81801701296482
+    L 862.529633245083,345.1819829870352
+    L 440.94268581790766,345.1819829870352
+    Z
+  " fill="rgba(255, 255, 255, 0.6)" stroke="rgb(132, 0, 0)" stroke-width="8.367033886488px"/><text class="net-label-text" x="456.00334681358606" y="300" fill="rgb(132, 0, 0)" text-anchor="start" dominant-baseline="central" font-family="sans-serif" font-variant-numeric="tabular-nums" font-size="75.30330497839199px" transform="">ADC_D0_P</text></svg>
