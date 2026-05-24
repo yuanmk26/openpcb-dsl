@@ -1,6 +1,6 @@
 import type { ComponentIR } from "../ir/circuit-ir";
 import { getSymbolSpecById } from "./symbol-registry";
-import type { SymbolSpec, TscircuitSymbolMapping } from "./types";
+import type { SymbolSpec } from "./types";
 
 export function inferSymbolKind(component: ComponentIR): string {
   const typeCandidates = [
@@ -48,10 +48,6 @@ export function resolveSymbolSpec(symbolKind: string, _component: ComponentIR): 
   }
 
   return fallback;
-}
-
-export function mapSymbolSpecToTscircuit(spec: SymbolSpec): TscircuitSymbolMapping | undefined {
-  return spec.backendMappings?.tscircuit;
 }
 
 function normalizeSymbolToken(value: string): string {
