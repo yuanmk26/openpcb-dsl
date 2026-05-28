@@ -21,6 +21,7 @@
             {
               "id": "pin:J1:1",
               "name": "1",
+              "number": "1",
               "direction": "passive",
               "side": "left",
               "offset": {
@@ -32,6 +33,7 @@
             {
               "id": "pin:J1:2",
               "name": "2",
+              "number": "2",
               "direction": "passive",
               "side": "left",
               "offset": {
@@ -43,6 +45,7 @@
             {
               "id": "pin:J1:3",
               "name": "3",
+              "number": "3",
               "direction": "passive",
               "side": "left",
               "offset": {
@@ -54,6 +57,7 @@
             {
               "id": "pin:J1:4",
               "name": "4",
+              "number": "4",
               "direction": "passive",
               "side": "left",
               "offset": {

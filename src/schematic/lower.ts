@@ -241,17 +241,23 @@ function createPinAnchors(
     const centeredY = (slot - (totalOnSide - 1) / 2) * GENERIC_PIN_STEP_Y;
     const pinDef = componentDef?.pins[name];
 
-    return {
+    const anchor: SchematicPinAnchor = {
       id: `pin:${component.ref}:${name}`,
       name,
-      direction: mapPinKindToDirection(pinDef),
       side: isLeft ? "left" : "right",
       offset: {
         x: isLeft ? -GENERIC_PIN_OFFSET_X : GENERIC_PIN_OFFSET_X,
         y: centeredY,
       },
-      electricalType: pinDef?.kind,
     };
+    const direction = mapPinKindToDirection(pinDef);
+    if (direction !== undefined) {
+      anchor.direction = direction;
+    }
+    if (pinDef?.kind !== undefined) {
+      anchor.electricalType = pinDef.kind;
+    }
+    return anchor;
   });
 }
 
@@ -276,6 +282,7 @@ function createAnchorFromSymbolPinSpec(ref: string, pin: SymbolPinSpec): Schemat
   return {
     id: `pin:${ref}:${pin.name}`,
     name: pin.name,
+    number: pin.number,
     direction: pin.direction,
     side: pin.side,
     offset: pin.offset,
